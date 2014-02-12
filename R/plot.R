@@ -1,34 +1,84 @@
-#' Plot the Adjusted and Unadjusted Series
+#' Seasonal Adjustment Plots
 #' 
-#' \code{plot} method for class \code{"seas"}. Plot the adjusted and unadjusted
-#' series, as well as the outliers. Optionally draw the trend series.
+#' Functions to graphically analyze a \code{"seas"} object. More graphs can be 
+#' plotted with standard R functions (see examples). For diagnostical 
+#' statistics, see \code{\link{qs}}.
 #' 
-#' @param x  an object of class \code{"seas"}, usually, a result of a 
-#'   call to \code{\link{seas}}.
-#' @param outliers   logical, should the oultiers be drawn
-#' @param trend   logical, should the trend be drawn
-#' @param \dots   further arguments passed to \code{ts.plot}.
+#' \code{plot} calls the plot method for class \code{"seas"}. It plots the 
+#' adjusted and unadjusted series, as well as the outliers. Optionally draws the
+#' trend series.
+#' 
+#' \code{residplot} plots the residuals and the outliers.
+#' 
+#' \code{monthplot} calls the monthplot method for class \code{"seas"}. It plot 
+#' the seasonal and SI component periodwise. Like the default method `monthplot`
+#' can be used for all frequencies.
+#' 
+#' \code{plot.slidingspans} calls the plot method for objects of class
+#' \code{"slidingspans"}. It draws the seasonal component for the analyzed
+#' spans.
+#' 
+#' \code{plot.revisions} calls the plot method for objects of class
+#' \code{"revisons"}. It draws concurrent and the latest estimation of the
+#' seasonal adjusted series.
+#' 
+#' @param x  an object of class \code{"seas"}, usually, a result of a call to
+#'   \code{\link{seas}}.
+#' @param outliers   logical, should the oultiers be drawn.
+#' @param trend      logical, should the trend be drawn.
+#' @param choice     character string, \code{"seasonal"} (default) or
+#'   \code{"irregular"}.
+#' @param main    character string, title of the graph.
+#' @param \dots   further arguments passed to the plotting functions.
 #'   
-#' @return returns a plot as its side effect.
+#' @return All plot functions returns a plot as their side effect.
 #'   
-#' @seealso \code{\link{seas}} for the main function.
+#' @seealso \code{\link{seas}}, for the main function.
+#' @seealso \code{\link{qs}}, for diagnostical statistics.
+#'   
+#' @references Vignette with a more detailed description: 
+#'   \url{http://cran.r-project.org/web/packages/seasonal/vignettes/seas.pdf}
+#'   
+#'   Wiki page with a comprehensive list of R examples from the X-13ARIMA-SEATS 
+#'   manual: 
+#'   \url{https://github.com/christophsax/seasonal/wiki/Examples-of-X-13ARIMA-SEATS-in-R}
+#'   
+#'   
+#'   Official X-13ARIMA-SEATS manual: 
+#'   \url{http://www.census.gov/ts/x13as/docX13AS.pdf}
 #'   
 #' @export
 #' @method plot seas
 #'   
 #' @examples
 #' \dontrun{
-#' x <- seas(AirPassengers, regression.aictest = c("td", "easter"))
-#' plot(x)  
-#' plot(x, outliers = FALSE)  
-#' plot(x, trend = TRUE) 
+#' 
+#' m <- seas(AirPassengers)
+#' 
+#' plot(m)  
+#' plot(m, outliers = FALSE)  
+#' plot(m, trend = TRUE) 
+#' 
+#' residplot(m)
+#' residplot(m, outliers = FALSE)  
+#' 
+#' monthplot(m)
+#' 
+#' plot(slidingspans(m))
+#' plot(revisions(m))
+#' 
+#' # use R functions to analyze "seas" models
+#' pacf(resid(m))
+#' spectrum(diff(resid(m)))
+#' plot(density(resid(m)))
+#' qqnorm(resid(m))
 #' }
-plot.seas <- function(x, outliers = TRUE, trend = FALSE, ...){
+plot.seas <- function(x, outliers = TRUE, trend = FALSE, main = "unadjusted and seasonally adjusted series",...){
+
   ts.plot(cbind(original(x), final(x)), 
           col = c("black", "red"), 
           lwd = c(1, 2),
-          ylab = "value",
-          main = "unadjusted and seasonally adjusted series", ...
+          main = main, ...
   )
   
   if (identical(trend, TRUE)){
@@ -44,28 +94,7 @@ plot.seas <- function(x, outliers = TRUE, trend = FALSE, ...){
   }
 }
 
-#' Plot the Residuals of an X13 regARIMA model
-#' 
-#' Plot the residuals of an X13 regARIMA model, as well as the outliers.
-#' Optionally draw the trend series.
-#' 
-#' @param x  an object of class \code{"seas"}, usually, a result of a call to 
-#'   \code{\link{seas}}.
-#' @param outliers   logical, should the oultiers be drawn.
-#' @param \dots   further arguments passed to \code{ts.plot}.
-#'   
-#' @return returns a plot as its side effect.
-#'   
-#' @seealso \code{\link{seas}} for the main function.
-#'   
-#' @export
-#'   
-#' @examples
-#' \dontrun{
-#' x <- seas(AirPassengers, regression.aictest = c("td", "easter"))
-#' residplot(x)  
-#' residplot(x, outliers = FALSE)  
-#' }
+#' @rdname plot.seas
 #' @export
 residplot <- function(x, outliers = TRUE, ...){
   ts.plot(resid(x), ylab = "value",
@@ -82,40 +111,49 @@ residplot <- function(x, outliers = TRUE, ...){
 }
 
 
-#' Plot Seasonal or Irregular Factors
-#' 
-#' \code{monthplot} method for class \code{"seas"}. Plot seasonal or irregular factors. 
-#' 
-#' @param x  an object of class \code{"seas"}, usually, a result of a call to 
-#'   \code{\link{seas}}.
-#' @param choice  character string, either \code{"seasonal"} or \code{"irregular"}.
-#' @param \dots   further arguments passed to \code{monthplot.default}.
-#'   
-#' @return returns a plot as its side effect.
-#'   
-#' @seealso \code{\link{seas}} for the main function.
-#'   
-#' @export
-#' @method monthplot seas
-#'   
-#' @examples
-#' \dontrun{
-#' x <- seas(AirPassengers, regression.aictest = c("td", "easter"))
-#' monthplot(x)  
-#' monthplot(x, choice = "irregular")  
-#' }
+#' @rdname plot.seas
 #' @export
 #' @method monthplot seas
 monthplot.seas <- function(x, choice = "seasonal", ...){
   if (choice == "seasonal"){
-    monthplot(x$data[,'adjustfac'], ylab = "factor", main = "seasonal component", ...)
+    monthplot(x$data[,'seasonal'], ylab = "", lwd = 2, col = "red", main = "seasonal component, SI ratio", ...)
+    monthplot(siratio(x), col = "blue", type = "h", add = TRUE)
   }
   if (choice == "irregular"){
-    monthplot(x$data[,'irregular'], ylab = "factor", main = "irregular component", ...)
+    monthplot(x$data[,'irregular'], ylab = "", main = "irregular component")
   }
 }
 
 
 
+siratio <- function(x){
+  if (x$transform.function == "log"){
+    z <- x$data[, 'irregular'] * x$data[, 'seasonal']
+  } else {
+    z <- x$data[, 'irregular'] + x$data[, 'seasonal']
+  }
+  na.omit(z)
+}
 
 
+
+#' @rdname plot.seas
+#' @method plot slidingspans
+#' @export
+plot.slidingspans <- function(x, main = "sliding spans", ...){
+  ser <- x$sfspans
+  nser <- dim(ser)[2]
+  col = rev(rainbow(nser-1))
+  ts.plot(ser[, -nser], col = col, lty = 1, main = main, ...)
+  legend("topleft", colnames(ser)[-nser], lwd = 2, lty = 1, col = col, bty = "n", horiz = TRUE)
+}
+
+
+#' @rdname plot.seas
+#' @method plot revisions
+#' @export
+plot.revisions <- function(x, main = "revisions", ...){
+  ts.plot(x$sae, col = c("black", "red"), main = main, ...)
+  
+  legend("topleft", c("concurrent estimation", "final estimation"), lty = 1, col = c("black", "red"), bty = "n", horiz = TRUE)
+}

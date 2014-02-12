@@ -1,0 +1,131 @@
+\name{genhol}
+\alias{genhol}
+\title{Generate Holiday Regression Variables}
+\usage{
+genhol(x, start = 0, end = 0, frequency = 12, center = "none")
+}
+\arguments{
+  \item{x}{a vector of class \code{"\link{Date}"},
+  containing the occurences of the holiday. It can be
+  generated with \code{\link{as.Date}}.}
+
+  \item{start}{integer, shifts the start point of the
+  holiday. Use negative values if \code{start} is before
+  the specified date.}
+
+  \item{end}{integer, shifts end point of the holiday. Use
+  negative values if \code{end} is before the specified
+  date.}
+
+  \item{frequency}{integer, frequency of the resulting
+  series}
+
+  \item{center}{character string. Either \code{"calendar"},
+  \code{"mean"} or \code{"none"} (default). Centering
+  avoids a bias in the resultign series.  Use
+  \code{"calendar"} for Easter or Chinese New Year,
+  \code{"mean"} for Ramadan. See references: Notes on
+  centering holiday.}
+}
+\value{
+an object of class \code{"ts"} that can be used as a user
+defined variable in \code{\link{seas}}.
+}
+\description{
+A replacement for the genhol software by the U.S. Census
+Bureau, a utility that uses the same procedure as
+X-12-ARIMA to create regressors for the U. S. holidays of
+Easter, Labor Day, and Thanksgiving.
+}
+\details{
+The resulting time series can be used as a user defined
+variable in \code{\link{seas}}. Usually, you want the
+holiday effect to be removed from the final series, so you
+need to specify \code{regression.usertype = "holiday"}.
+(The default is to include user defined variables in the
+final series.)
+}
+\examples{
+\dontrun{
+
+data(holiday)  # dates of Chinese New Year and Easter
+
+### use of genhol
+
+# 10 day before Easter day to one day after, quarterly data:
+genhol(easter, start = -10, end = 1, frequency = 4)
+genhol(easter, frequency = 2)  # easter is allways in the first half-year
+
+# centering for overall mean or monthly calendar means
+genhol(easter, center = "mean")
+genhol(easter, center = "calendar")
+
+### replicating X-13's built-in Easter adjustment
+
+# built-in
+m1 <- seas(x = AirPassengers,
+regression.variables = c("td1coef", "easter[1]", "ao1951.May"),
+arima.model = "(0 1 1)(0 1 1)", regression.aictest = NULL,
+outlier = NULL, transform.function = "log", x11 = list())
+summary(m1)
+
+# user defined variable
+ea1 <- genhol(easter, start = -1, end = -1, center = "calendar")
+
+# regression.usertype = "holiday" ensures that the effect is removed from
+# the final series.
+m2 <- seas(x = AirPassengers,
+           regression.variables = c("td1coef", "ao1951.May"),
+           xreg = ea1, regression.usertype = "holiday",
+           arima.model = "(0 1 1)(0 1 1)", regression.aictest = NULL,
+           outlier = NULL, transform.function = "log", x11 = list())
+summary(m2)
+
+all.equal(final(m2), final(m1), tolerance = 1e-06)
+
+
+# with genhol, its possible to do sligtly better, by adjusting the length
+# of easter
+
+ea2 <- genhol(easter, start = -2, end = +1, center = "calendar")
+m3 <- seas(x = AirPassengers,
+           regression.variables = c("td1coef", "ao1951.May"),
+           xreg = ea2, regression.usertype = "holiday",
+           arima.model = "(0 1 1)(0 1 1)", regression.aictest = NULL,
+           outlier = NULL, transform.function = "log", x11 = list())
+summary(m3)
+
+
+### Chinese New Year
+
+data(cntrade)  # exports and imports of China
+data(holiday)  # dates of Chinese New Year and Easter
+
+# de facto holiday length: http://en.wikipedia.org/wiki/Chinese_New_Year
+cny.ts <- genhol(cny, start = 0, end = 6, center = "calendar")
+
+m1 <- seas(x = imp, xreg = cny.ts, regression.usertype = "holiday", x11 = list(),
+           regression.variables = c("td1coef", "ls1985.Jan", "ls2008.Nov"),
+           arima.model = "(0 1 2)(0 1 1)", regression.aictest = NULL,
+           outlier = NULL, transform.function = "log")
+summary(m1)
+
+# compare to identical no-CNY model:
+m2 <- seas(x = imp, x11 = list(),
+           regression.variables = c("td1coef", "ls1985.Jan", "ls2008.Nov"),
+           arima.model = "(0 1 2)(0 1 1)", regression.aictest = NULL,
+           outlier = NULL, transform.function = "log")
+summary(m2)
+
+ts.plot(final(m1), final(m2), col = c("red", "black"))
+}
+}
+\references{
+United States Census Bureau, Notes on centering holiday
+regressors:
+\url{http://www.census.gov/srd/www/genhol/genhol_center.html}
+}
+\seealso{
+\code{\link{seas}} for the main function of seasonal.
+}
+

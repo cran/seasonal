@@ -2,21 +2,21 @@
 \alias{checkX13}
 \title{Check the installation of X-13ARIMA-SEATS}
 \usage{
-  checkX13(fail = FALSE, confirmation = TRUE)
+checkX13(fail = FALSE, full = TRUE)
 }
 \arguments{
-  \item{fail}{logical, wether an error should interrupt the
-  process. If \code{FALSE}, only a message will be
-  returned.}
+  \item{fail}{logical, whether an error should interrupt
+  the process. If \code{FALSE}, a message is returned.}
 
-  \item{confirmation}{logical, a message is returned if
-  everything works.}
+  \item{full}{logical, whether a full test should be
+  performed. Runs \code{Testairline.spc} (which is shiped
+  with X-13ARIMA-SEATS) to test the working of the
+  binaries. Returns a message.}
 }
 \description{
-  The function checks the installation of the binary
-  executables of X-13ARIMA-SEATS. For installation details,
-  consider Section 2 of the package vignette:
-  \code{vignette("seas")}
+Check the installation of the binary executables of
+X-13ARIMA-SEATS. For installation details, consider Section
+2 of the package vignette: \code{vignette("seas")}
 }
 \examples{
 \dontrun{
