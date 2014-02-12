@@ -11,12 +11,14 @@ print.seas <- function(x, ...){
   # Returns: 
   #   prints the object with print.lm as a side effect
   
-  # converting to class "lm" and use the corresponding method
+  x$coefficients <- coef(x)  # make default method for coef working
+  
+  # convert to class "lm" and use the corresponding method
   attr(x, "class") <- "lm"
   print(x, ...)
   
   if (length(x$err) > 5){
-    cat("\n\nX13-ARIMA-SEATS messages:", x$err[-c(1:5)], sep = "\n")
+    cat("X13-ARIMA-SEATS messages:", x$err[-c(1:5)], sep = "\n")
   } 
 }
 
@@ -24,13 +26,21 @@ print.seas <- function(x, ...){
 #' @method print spclist
 #' @export
 print.spclist <- function(x, ...){
-  cat(parse_spclist(x))
+  cat(deparse_spclist(x))
 }
 
 
-#' @method residuals seas
+
+
 #' @export
-residuals.seas <- function(object, ...){
-  object$data[,'residuals']
+#' @method coef seas
+coef.seas <- function(object, ...){
+  object$estimates$coefficients
 }
 
+
+#' @export
+#' @method nobs seas
+nobs.seas <- function(object, ...){
+  object$lkstats['nobs']
+}

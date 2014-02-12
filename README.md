@@ -1,18 +1,22 @@
-**seasonal**: R interface to X-13ARIMA-SEATS
---------------------------------------------
+R interface to X-13ARIMA-SEATS
+------------------------------
 
-**seasonal** is an easy-to-use R-interface to X-13ARIMA-SEATS, a seasonal adjustment software developed by the [United States Census Bureau][census]. X-13ARIMA-SEATS combines and extends the capabilities of the older X-12ARIMA (developed by the Census Bureau) and the TRAMO-SEATS (developed by the Bank of Spain) software packages. 
+*seasonal* is an easy-to-use R-interface to X-13ARIMA-SEATS, a seasonal adjustment software developed by the [United States Census Bureau][census]. X-13ARIMA-SEATS combines and extends the capabilities of the older X-12ARIMA (developed by the Census Bureau) and the TRAMO-SEATS (developed by the Bank of Spain) software packages. 
 
 If you are new to seasonal adjustment or X-13ARIMA-SEATS, you may use the automated procedures to quickly produce seasonal adjustments of time series. Start with the [Getting started](#getting-started) section and skip the rest. 
 
-If you are already familiar with X-13ARIMA-SEATS, you may benefit from the equivalent use of its syntax in **seasonal**. Read the [Syntax equivalence](#syntax-equivalence-to-x-13arima-seats) section and have a look at the [wiki][examples], where most examples from the original X-13ARIMA-SEATS manual are reproduced in R. For more details on X-13ARIMA-SEATS, as well as for explanations on the X-13ARIMA-SEATS syntax, see the [manual][manual] or the [quick reference][qref].
+If you are already familiar with X-13ARIMA-SEATS, you may benefit from the equivalent use of its syntax in *seasonal*. Read the [Syntax equivalence](#syntax-equivalence-to-x-13arima-seats) section and have a look at the [wiki][examples], where almost all examples from the original X-13ARIMA-SEATS manual are reproduced in R. For more details on X-13ARIMA-SEATS, as well as for explanations on the X-13ARIMA-SEATS syntax, see the [manual][manual] or the [quick reference][qref].
 
 ### Installation
 
-**seasonal** does not includes the binary executables of X-13ARIMA-SEATS. They need to be installed separately from [here][census_win] (Windows, filename `x13asall.zip`) or [here][census_linux]  (Linux, filename `x13asall.tar.gz`). My own compilation for Mac OS-X can be obtained [upon request](mailto:christoph.sax@gmail.com).
+To install the stable version directly from CRAN, type to the R console:
+
+    install.packages("seasonal")
+
+*seasonal* does not includes the binary executables of X-13ARIMA-SEATS. They need to be installed separately from [here][census_win] (Windows, filename `x13asall.zip`) or [here][census_linux]  (Linux, filename `x13asall.tar.gz`). My own compilation for Mac OS-X can be obtained [upon request](mailto:christoph.sax@gmail.com).
 
 
-Download the file, unzip it and copy the folder to the desired location in your file system. Next, you need to tell **seasonal** where to find the binary executables of X-13ARIMA-SEATS, by setting the specific environmental variable `X13_PATH`. This may be done during your active session in R:
+Download the file, unzip it and copy the folder to the desired location in your file system. Next, you need to tell *seasonal* where to find the binary executables of X-13ARIMA-SEATS, by setting the specific environmental variable `X13_PATH`. This may be done during your active session in R:
 
     Sys.setenv(X13_PATH = "YOUR_X13_DIRECTORY")
  
@@ -33,9 +37,9 @@ There are other ways to set an environmental variable permanently in R, see `?St
 
 ### Getting started
 
-`seas` ist the core function of the **seasonal** package. By default, `seas` calls the automatic procedures of X-13ARIMA-SEATS to perform a seasonal adjustment that works very well in most circumstances. It returns an object of class `"seas"` that contains all necessary information on the adjustment process, as well as the series. The `final` method for `"seas"` objects returns the adjusted series, the `plot` method shows a plot with the unadjusted and the adjusted series. 
+`seas` ist the core function of the *seasonal* package. By default, `seas` calls the automatic procedures of X-13ARIMA-SEATS to perform a seasonal adjustment that works well in most circumstances. It returns an object of class `"seas"` that contains all necessary information on the adjustment process, as well as the series. The `final` method for `"seas"` objects returns the adjusted series, the `plot` method shows a plot with the unadjusted and the adjusted series. 
 
-    x <- seas(AirPassengers)
+    m <- seas(AirPassengers)
     final(x)
     plot(x)
      
@@ -43,7 +47,7 @@ The first argument has to be a time series of class `"ts"`. By default, `seas` c
 
     seas(AirPassengers, x11 = list())
      
-Besides performing seasonal adjustment with SEATS, a default call of `seas` invokes the following automatic procedures of X-13ARIMA-SEATS:
+Besides performing seasonal adjustment with SEATS, a default call to `seas` invokes the following automatic procedures of X-13ARIMA-SEATS:
 
   - Transformation selection (log / no log)
   - Detection of trading day and Easter effects
@@ -58,19 +62,19 @@ Alternatively, all inputs may be entered manually, as in the following example:
 
 The `static` command reveals the static call from above that is needed to replicate the automatic seasonal adjustment procedure:
 
-    static(x)
-    static(x, coef = TRUE)  # also fixes the coefficients
+    static(m)
+    static(m, coef = TRUE)  # also fixes the coefficients
     
 If you are using RStudio, the `inspect` command offers a way to analyze and modify a seasonal adjustment procedure (see the section below for details):
 
-    inspect(AirPassengers)
+    inspect(m)
 
 
 ### Syntax equivalence to X-13ARIMA-SEATS
 
-The X-13ARIMA-SEATS syntax uses *specs* and *arguments*, with each spec optionally containing some arguments. For details, see the [manual][manual]. These spec-argument combinations can be added to `seas` by separating spec and argument by a dot (`.`). For example, in order to set the `variables` argument of the `regression` spec equal to `td` and `ao1999.jan`, the input to `seas` looks like this:
+The X-13ARIMA-SEATS syntax uses *specs* and *arguments*, with each spec optionally containing some arguments. For details, see the [manual][manual]. These spec-argument combinations can be added to `seas` by separating spec and argument by a dot (`.`). For example, in order to set the 'variables' argument of the 'regression' spec equal to `td` and `ao1999.jan`, the input to `seas` looks like this:
 
-    x <- seas(AirPassengers, regression.variables = c("td", "ao1965.jan"))
+    m <- seas(AirPassengers, regression.variables = c("td", "ao1955.jan"))
    
 Note that R vectors may be used as an input. If a spec is added without any arguments, the spec should be set equal to an empty `list()`. Several defaults of `seas` are empty lists, such as the default `seats = list()`. See the help page (`?seas`) for more details on the defaults.
 
@@ -89,10 +93,9 @@ translates to R in the following way:
          arima.model = "(0 1 1)"
     )
     
-`seas` takes care of the `series` spec, and no input beside the time series has to be provided. As `seas` uses the SEATS procedure by default, the use of X11 has to be specified manually. When the `x11` spec is added as an input (like above), the mutually exclusive and default `seats` spec is automatically disabled. With `arima.model`, an additional spec-argument entry is added to the input of X-13ARIMA-SEATS. As the spec cannot be used in the same call as the `automdl` spec, the latter is automatically disabled. The best way to learn about the relationship between the syntax of X-13ARIMA-SEATS and seasonal is to study the growing list of examples in the [wiki][examples].
+`seas` takes care of the 'series' spec, and no input beside the time series has to be provided. As `seas` uses the SEATS procedure by default, the use of X11 has to be specified manually. When the 'x11' spec is added as an input (like above), the mutually exclusive and default 'seats' spec is automatically disabled. With `arima.model`, an additional spec-argument is added to the input of X-13ARIMA-SEATS. As the spec cannot be used in the same call as the 'automdl' spec, the latter is automatically disabled. The best way to learn about the relationship between the syntax of X-13ARIMA-SEATS and *seasonal* is to study the comprehensive list of examples in the [wiki][examples]. 
 
-
-There are several mutually exclusive specs in X-13ARIMA-SEATS. If more than one mutually exclusive specs is included, X-13ARIMA-SEATS would return an error. In contrast, `seas` follows a set of priority rules, where the lower priority is overwritten by the higher priority. Usually, the default has the lowest priority and is overwritten if one or several of the following `spec` inputs are provided:
+There are several mutually exclusive specs in X-13ARIMA-SEATS. If more than one mutually exclusive specs is included, a set of priority rule is followed, where the lower priority is overwritten by the higher priority:
 
 - Model selection
     1. `arima`
@@ -102,50 +105,64 @@ There are several mutually exclusive specs in X-13ARIMA-SEATS. If more than one 
 - Adjustment procedure
     1. `x11`
     2. `seats` (default)
-  
-- Regression procedure
-    1. `x11regression`
-    2. `regression` (default)
-  
 
 ### Graphs
 
-All plots from Win X-13, a graphical Windows version of X-13ARIMA-SEATS, are reproducible in R. The main plot function draws the seasonally adjusted and unadjusted series, as well as the outliers. Optionally, it also draws the trend of the seasonal decomposition:
+There are several graphical tools to analyze a `seas` model. The main plot function draws the seasonally adjusted and unadjusted series, as well as the outliers. Optionally, it also draws the trend of the seasonal decomposition:
 
-    x <- seas(AirPassengers, regression.aictest = c("td", "easter"))
-    plot(x)
-    plot(x, outliers = FALSE)
-    plot(x, trend = TRUE)
+    m <- seas(AirPassengers, regression.aictest = c("td", "easter"))
+    plot(m)
+    plot(m, outliers = FALSE)
+    plot(m, trend = TRUE)
 
-The `monthplot` function allows for a monthwise plot (or quarterwise, with the identical function name) of the data. There is a method for `"seas"` objects:
+The `monthplot` function allows for a monthwise plot (or quarterwise, with the same function name) of the seasonal and the SI component:
 
-    monthplot(x)
-    monthplot(x, choice = "irregular")
+    monthplot(m)
+    monthplot(m, choice = "irregular")
 
-With `spectrum`, the spectral density of any series can be estimated and plotted:
+Also, many standard R function can be used to analyze a `"seas"` model:
 
-    spectrum(diff(final(x)))
-    spectrum(diff(original(x)))
+    pacf(resid(m))
+    spectrum(diff(resid(m)))
+    plot(density(resid(m)))
+    qqnorm(resid(m))
+
+
+
+###  Diagnostical re-evaluation
+
+For diagnostical purposes, some functions re-evaluate a `"seas"` object and capture the full content or parts of the `.out` file from X-13ARIMA-SEATS. Re-evaluation on demand saves computing time and reduces the size of a `"seas"` object.
+
+The `out` function shows the full content of the `.out` file from X-13ARIMA-SEATS in a console viewer. It can also be searched for an arbitary term:
+
+    out(m)
+    out(m, search = "regARIMA model residuals")
+
+The `slidingspans` and `revisions` function call the 'slidingspans' and 'history' spec of X-13ARIMA-SEATS and show the corresponding parts of the `.out` file. Note that against the convention, the 'history' spec is called by the differently named function `revisions`, in order to avoid a naming collision with the function from the preloaded `utils` pacakge. `slidingspans` analyzes the stability of a seasonal adjustment, `revisions` computes an out-of-sample revision history. A `plot` method shows a graphical overview of the analysis. For a detailed description of the two specs, consider section 7.16 and 7.8 in the [manual][manual].
+
+    slidingspans(m)
+    plot(slidingspans(m))
+    
+    revisions(m)
+    plot(revisions(m))
 
 
 ### Inspect tool
 
-The `inspect` function is a powerful tool for choosing a good seasonal adjustment model. It uses the `manipulate` package and can only be used with the (free) [RStudio IDE][rstudio]. `inspect` uses a `"ts"` object as its first argument:
+The `inspect` function is a powerful tool for choosing a good seasonal adjustment model. It uses the `manipulate` package and can only be used with the (free) [RStudio IDE][rstudio]. The goal of `inspect` is to summarize all relevant options, plots and statistics that should be usually considered. `inspect` uses a `"seas"` object as its only argument:
 
-    inspect(AirPassengers)
-    
-Optionally, you can pass arbitrary spec-arguments to inspect. Here, the maximum of iterations during estimation is increased from 500 to 1000:
+    inspect(m)
 
-    inspect(AirPassengers, estimate.maxiter = 1000) 
-    
-The inspect function opens an interactive window that allows for the manipulation of a number of arguments. It offers several views to analyze the series graphically. With each change, the adjustment process and the visualizations are recalculated. Summary statics are shown in the R console. With the 'Show static call' option, a replicable static call is also shown in the console. Note that the last option will double the time for recalculation, as the static function also tests the static call each time (this is a beta feature of seasonal, which allows intensive testing; it may be disabled in more stable versions).
+The `inspect` function opens an interactive window that allows for the manipulation of a number of arguments. It offers several views to analyze the series graphically. With each change, the adjustment process and the visualizations are recalculated. Summary statics are shown in the R console. 
+
+With the 'Show static call' option, a replicable static call is also shown in the console. Note that this option will double the time for recalculation, as the static function also tests the static call each time. 
 
 
 ### License
 
-**seasonal** is free and open source, licensed under GPL-3. It has been developed for the use at the Swiss State Secretariat of Economic Affairs and is completely independent of X-13ARIMA-SEATS, which is in the Public Domain.
+*seasonal* is free and open source, licensed under GPL-3. It has been developed for the use at the Swiss State Secretariat of Economic Affairs and is not connected to the development of X-13ARIMA-SEATS, which is in the Public Domain.
 
-This is a very new package, and it may still contain bugs. Please report them on [Github][github] or send me an [e-mail](mailto:christoph.sax@gmail.com). Thank you!
+This is a new package, and it may still contain bugs. Please report them on [Github][github] or send me an [e-mail](mailto:christoph.sax@gmail.com). Thank you!
 
 [manual]: http://www.census.gov/ts/x13as/docX13AS.pdf "Reference Manual"
 

@@ -10,15 +10,18 @@
 #' @param signif.stars logical. If \code{TRUE}, 'significance stars' are printed 
 #'                    for each coefficient.
 #' @param \dots       further arguments passed to or from other methods.
-
+#' 
 #' @return \code{summary.seas} returns a list containing the summary statistics 
-#'   included in \code{object}, and computes the following additional
+#'   included in \code{object}, and computes the following additional 
 #'   statistics:
-#'  
-#'   \item{coefficients}{a named matrix containing coefficients, standard
+#'   
+#'   \item{coefficients}{a named matrix containing coefficients, standard 
 #'   deviations, t-values and p-values}
 #'   
-#'   The \code{print} method prints the summary output in a similar way as the method for \code{"lm"}.
+#'   \item{transform}{character string with the type of intial transformation}
+#'   
+#'   The \code{print} method prints the summary output in a similar way as the
+#'   method for \code{"lm"}.
 #'   
 #' @examples
 #' \dontrun{
@@ -34,7 +37,7 @@ summary.seas <- function(object, ...){
   # coefficents matrix
   if (!is.null(coef(object))){
     est  <- coef(object)
-    se   <- object$se
+    se   <- object$estimates$se
     tval <- est/se
     pval <- 2 * pnorm(-abs(tval))
     
@@ -45,12 +48,12 @@ summary.seas <- function(object, ...){
                                        "Pr(>|z|)"))
   }
   
+  z$resid <- residuals(object)
+  z$qs <- qs(object)
   
   class(z) <- "summary.seas"
   z
 }
-
-
 
 
 
@@ -72,34 +75,74 @@ print.summary.seas <- function (x, digits = max(3, getOption("digits") - 3),
                  na.print = "NA")
   }
   
-  cat("\nARIMA structure:", x$mdl$arima$model)
-  cat("   Number of obs.:", formatC(x$lks['nobs'], format = "d"))
-  cat("\nTransform:", detect_trans(x))
-  cat("\nAIC:", formatC(x$lks['aic'], digits = digits))
-  cat(", AICC:", formatC(x$lks['Aicc'], digits = digits))
-  cat(", BIC:", formatC(x$lks['bic'], digits = digits))
 
+  cat("\nARIMA structure:", x$model$arima$model)
+  cat("   Number of obs.:", formatC(x$lkstats['nobs'], format = "d"))
+  cat("   Transform:", x$transform.function)
+#   cat("\nAIC:", formatC(x$lkstats['aic'], digits = digits))
+  cat("\nAICc:", formatC(x$lkstats['Aicc'], digits = digits))
+  cat(", BIC:", formatC(x$lkstats['bic'], digits = digits))
+
+  # QS Test
+  qsval <- c(x$qs[c('Original Series', 'Seasonally Adjusted Series'),][,1])
+  qspv <- c(x$qs[c('Original Series', 'Seasonally Adjusted Series'),][,2])
+  qsstars <- symnum(qspv, 
+                    corr = FALSE, na = FALSE, legend = FALSE,
+                    cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1), 
+                    symbols = c("***", "**", "*", ".", " "))
+  
+  cat("   QS seas. test (adj. series):", formatC(qsval[2], digits = digits)," ", qsstars[2], sep = "")
+  
+  if (!is.null(x$resid)){
+    # Box Ljung Test
+    bltest <- Box.test(x$resid, lag = 24, type = "Ljung")
+    blstars <- symnum(bltest$p.value, 
+                      corr = FALSE, na = FALSE, legend = FALSE,
+                      cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1), 
+                      symbols = c("***", "**", "*", ".", " "))
+    cat("\nBox-Ljung (no autocorr.):", 
+        formatC(bltest$statistic, digits = digits), blstars)
+    
+    
+    # Normality
+    swtest <- shapiro.test(x$resid)
+    swstars <- symnum(swtest$p.value, 
+                      corr = FALSE, na = FALSE, legend = FALSE,
+                      cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1), 
+                      symbols = c("***", "**", "*", ".", " "))
+    cat("  Shapiro (normality):", formatC(swtest$statistic, digits = digits), swstars)
+  }
   cat("\n")
   if (length(x$err) > 5){
     cat("\n\nX13-ARIMA-SEATS messages:", x$err[-c(1:5)], sep = "\n")
   } 
+  
   invisible(x)
 }
 
-
-detect_trans <- function(x){
-  if (!is.null(x$spc$transform$`function`)){
-    if (x$spc$transform$`function` == "auto"){
-      if (x$is.log){
-        z <- "log"
-      } else {
-        z <- "none"
-      }
-    } else {
-      z <- x$spc$transform$`function`
-    }
-  } else {
-    z <- "none"
-  }
-  z
-}
+# 
+# transform_function <- function(x){
+#   # subfunction to evaluate the tranformation, both automatically or manually 
+#   # choosen 
+#   # 
+#   # x  "seas" object
+#   #
+#   # returns: character string with the type of intial transformation
+#   # 
+#   # used by: summary.seas, static
+#   #
+#   if (!is.null(x$spc$transform$`function`)){
+#     if (x$spc$transform$`function` == "auto"){
+#       if (x$is.log){
+#         z <- "log"
+#       } else {
+#         z <- "none"
+#       }
+#     } else {
+#       z <- x$spc$transform$`function`
+#     }
+#   } else {
+#     z <- "none"
+#   }
+#   z
+# }
