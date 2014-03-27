@@ -77,7 +77,7 @@ inspect.seas <- function(x){
                   "seasonal component, SI ratio", 
                   "residuals of regARIMA", "residual partial autocorrelation", 
                   "sliding spans", 
-                  "revisions", 
+                  "history", 
                   label = "view"),
     is.static.call = checkbox(FALSE, "show static call")
   )
@@ -136,9 +136,18 @@ SubPlot <- function(view,
   } else if (view == "residual partial autocorrelation"){
     pacf(resid(s), main = "residual partial autocorrelation", ylab = "")
   } else if (view == "sliding spans"){
-    plot(slidingspans(s))
-  } else if (view == "revisions"){
-    plot(revisions(s))
+    dta <- series(s, "slidingspans.sfspans", verbose = FALSE)
+    dta <- dta[, -dim(dta)[2]]  # remove last column
+    nc <- NCOL(dta)
+    ncol <- rainbow(nc)
+    ts.plot(dta, col = ncol, main = "slidingspans: seasonal component")
+    legend("topleft", colnames(dta), lty = 1, col = ncol, bty = "n", horiz = TRUE)
+  } else if (view == "history"){
+    dta <- series(s, "history.saestimates", verbose = FALSE)
+    nc <- NCOL(dta)
+    ncol <- rainbow(nc)
+    ts.plot(dta, col = ncol, main = "history: adjusted series")
+    legend("topleft", colnames(dta), lty = 1, col = ncol, bty = "n", horiz = TRUE)
   } else {
     stop("something wrong.")
   }
@@ -153,8 +162,3 @@ SubPlot <- function(view,
 }
 
 
-#' @method inspect ts
-#' @export
-inspect.ts <- function(x){
-  message("The 'inspect' method for 'ts' objects is deprecated.\nUse inspect(seas(x)) instead. See ?inspect for details.")
-}

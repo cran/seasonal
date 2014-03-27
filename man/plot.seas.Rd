@@ -1,8 +1,6 @@
 \name{plot.seas}
 \alias{monthplot.seas}
-\alias{plot.revisions}
 \alias{plot.seas}
-\alias{plot.slidingspans}
 \alias{residplot}
 \title{Seasonal Adjustment Plots}
 \usage{
@@ -11,11 +9,7 @@
 
 residplot(x, outliers = TRUE, ...)
 
-\method{monthplot}{seas}(x, choice = "seasonal", ...)
-
-\method{plot}{slidingspans}(x, main = "sliding spans", ...)
-
-\method{plot}{revisions}(x, main = "revisions", ...)
+\method{monthplot}{seas}(x, choice = c("seasonal", "irregular"), ...)
 }
 \arguments{
   \item{x}{an object of class \code{"seas"}, usually, a
@@ -30,6 +24,9 @@ residplot(x, outliers = TRUE, ...)
 
   \item{main}{character string, title of the graph.}
 
+  \item{series}{X-13 name of the series to plot, see the
+  manual for a description.}
+
   \item{\dots}{further arguments passed to the plotting
   functions.}
 }
@@ -38,9 +35,6 @@ All plot functions returns a plot as their side effect.
 }
 \description{
 Functions to graphically analyze a \code{"seas"} object.
-More graphs can be plotted with standard R functions (see
-examples). For diagnostical statistics, see
-\code{\link{qs}}.
 }
 \details{
 \code{plot} calls the plot method for class \code{"seas"}.
@@ -53,14 +47,6 @@ outliers. Optionally draws the trend series.
 \code{"seas"}. It plot the seasonal and SI component
 periodwise. Like the default method `monthplot` can be used
 for all frequencies.
-
-\code{plot.slidingspans} calls the plot method for objects
-of class \code{"slidingspans"}. It draws the seasonal
-component for the analyzed spans.
-
-\code{plot.revisions} calls the plot method for objects of
-class \code{"revisons"}. It draws concurrent and the latest
-estimation of the seasonal adjusted series.
 }
 \examples{
 \dontrun{
@@ -76,10 +62,7 @@ residplot(m, outliers = FALSE)
 
 monthplot(m)
 
-plot(slidingspans(m))
-plot(revisions(m))
-
-# use R functions to analyze "seas" models
+# use standard R functions to analyze "seas" models
 pacf(resid(m))
 spectrum(diff(resid(m)))
 plot(density(resid(m)))

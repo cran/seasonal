@@ -1,8 +1,6 @@
 #' Seasonal Adjustment Plots
 #' 
-#' Functions to graphically analyze a \code{"seas"} object. More graphs can be 
-#' plotted with standard R functions (see examples). For diagnostical 
-#' statistics, see \code{\link{qs}}.
+#' Functions to graphically analyze a \code{"seas"} object. 
 #' 
 #' \code{plot} calls the plot method for class \code{"seas"}. It plots the 
 #' adjusted and unadjusted series, as well as the outliers. Optionally draws the
@@ -14,21 +12,15 @@
 #' the seasonal and SI component periodwise. Like the default method `monthplot`
 #' can be used for all frequencies.
 #' 
-#' \code{plot.slidingspans} calls the plot method for objects of class
-#' \code{"slidingspans"}. It draws the seasonal component for the analyzed
-#' spans.
-#' 
-#' \code{plot.revisions} calls the plot method for objects of class
-#' \code{"revisons"}. It draws concurrent and the latest estimation of the
-#' seasonal adjusted series.
-#' 
-#' @param x  an object of class \code{"seas"}, usually, a result of a call to
+#' @param x  an object of class \code{"seas"}, usually, a result of a call to 
 #'   \code{\link{seas}}.
 #' @param outliers   logical, should the oultiers be drawn.
 #' @param trend      logical, should the trend be drawn.
-#' @param choice     character string, \code{"seasonal"} (default) or
+#' @param choice     character string, \code{"seasonal"} (default) or 
 #'   \code{"irregular"}.
 #' @param main    character string, title of the graph.
+#' @param series  X-13 name of the series to plot, see the manual for a
+#'   description.
 #' @param \dots   further arguments passed to the plotting functions.
 #'   
 #' @return All plot functions returns a plot as their side effect.
@@ -42,6 +34,7 @@
 #'   Wiki page with a comprehensive list of R examples from the X-13ARIMA-SEATS 
 #'   manual: 
 #'   \url{https://github.com/christophsax/seasonal/wiki/Examples-of-X-13ARIMA-SEATS-in-R}
+#'   
 #'   
 #'   
 #'   Official X-13ARIMA-SEATS manual: 
@@ -64,10 +57,7 @@
 #' 
 #' monthplot(m)
 #' 
-#' plot(slidingspans(m))
-#' plot(revisions(m))
-#' 
-#' # use R functions to analyze "seas" models
+#' # use standard R functions to analyze "seas" models
 #' pacf(resid(m))
 #' spectrum(diff(resid(m)))
 #' plot(density(resid(m)))
@@ -114,7 +104,8 @@ residplot <- function(x, outliers = TRUE, ...){
 #' @rdname plot.seas
 #' @export
 #' @method monthplot seas
-monthplot.seas <- function(x, choice = "seasonal", ...){
+monthplot.seas <- function(x, choice = c("seasonal", "irregular"), ...){
+  choice <- match.arg(choice)
   if (choice == "seasonal"){
     monthplot(x$data[,'seasonal'], ylab = "", lwd = 2, col = "red", main = "seasonal component, SI ratio", ...)
     monthplot(siratio(x), col = "blue", type = "h", add = TRUE)
@@ -123,7 +114,6 @@ monthplot.seas <- function(x, choice = "seasonal", ...){
     monthplot(x$data[,'irregular'], ylab = "", main = "irregular component")
   }
 }
-
 
 
 siratio <- function(x){
@@ -135,25 +125,3 @@ siratio <- function(x){
   na.omit(z)
 }
 
-
-
-#' @rdname plot.seas
-#' @method plot slidingspans
-#' @export
-plot.slidingspans <- function(x, main = "sliding spans", ...){
-  ser <- x$sfspans
-  nser <- dim(ser)[2]
-  col = rev(rainbow(nser-1))
-  ts.plot(ser[, -nser], col = col, lty = 1, main = main, ...)
-  legend("topleft", colnames(ser)[-nser], lwd = 2, lty = 1, col = col, bty = "n", horiz = TRUE)
-}
-
-
-#' @rdname plot.seas
-#' @method plot revisions
-#' @export
-plot.revisions <- function(x, main = "revisions", ...){
-  ts.plot(x$sae, col = c("black", "red"), main = main, ...)
-  
-  legend("topleft", c("concurrent estimation", "final estimation"), lty = 1, col = c("black", "red"), bty = "n", horiz = TRUE)
-}

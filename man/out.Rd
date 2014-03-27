@@ -1,59 +1,38 @@
 \name{out}
 \alias{out}
-\alias{revisions}
-\alias{slidingspans}
-\title{Diagnostical Re-Evaluation}
+\title{Import X-13ARIMA-SEATS Text Output}
 \usage{
-out(x, line = 1, n = 100, search = NULL, ...)
-
-revisions(x, ...)
-
-slidingspans(x, ...)
+out(x, line = 1, n = 100, search = NULL, file = c("out", "log", "err"))
 }
 \arguments{
-  \item{x}{an object of class \code{"seas"} to
-  re-evaluate.}
+  \item{x}{an object of class \code{"seas"}.}
 
   \item{line}{starting line of the content.}
 
-  \item{n}{number of lines to show at once.}
+  \item{n}{number of lines to show on a page.}
 
-  \item{search}{chracter string. If specified, the content
-  is searched for the first occurence of the string (see
-  examples).}
+  \item{search}{regular expression chracter string. If
+  specified, the content is searched for the first
+  occurence (see examples).}
 
-  \item{...}{aditional spec-arguments options (see
-  details).}
+  \item{file}{\code{"out"} or \code{"log"}, which file to
+  show.}
 }
 \value{
-invisible, the full content or parts of the .out file as a
-(large) character vector. The content of the vector is
-displayed by a viewer function in the R console.
+an object of class \code{"out"}, essentially a character
+vector with attributes. The print method for \code{"out"}
+objects is adapted to the large size of the \code{.out}
+output. It allows for pagination and search (see examples).
 }
 \description{
-For diagnostical purposes, these functions re-evaluate an
-object of class seas and capture the full content or parts
-of the .out file from X-13ARIMA-SEATS.
+The \code{out} function shows the full content of the
+\code{.out}, the \code{.log} or the \code{.err} file form
+X-13ARIMA-SEATS.
 }
 \details{
-The \code{out} function shows the full content of the
-\code{.out} file form X-13ARIMA-SEATS. The
-\code{slidingspans} and \code{revisions} function call the
-'slidingspans' and 'history' spec of X-13ARIMA-SEATS and
-show the respective parts of the \code{.out} file. Note
-that against the convention, the 'history' spec is called
-by the function \code{revision}, in order to avoid a naming
-collision with the function from the preloaded \code{utils}
-package. For a description of the 'slidingsspan' and
-'history' spec, consider the X-13ARIMA-SEATS manual.
-
-For how to enter spec-arguments options, see the details in
-\code{"\link{seas}"}. In the \code{out} function,
-\code{...} are useful to add additional outputs to the
-\code{.out} file. In the \code{slidingspans} and
-\code{revisions} function, \code{...} are used to add
-additional options to the 'slidingspans' and 'history'
-spec.
+To keep the size of \code{"seas"} objects small, "seas"
+does not save the content of the \code{.out} by default.
+Instead, the \code{out} function re-evaluates the model.
 }
 \examples{
 \dontrun{
@@ -62,14 +41,19 @@ m <- seas(AirPassengers)
 # exit from the viewer with [q]
 out(m)
 out(m, search = "regARIMA model residuals")
+out(m, search = "Normality Statistics for regARIMA")
 
-slidingspans(m)
-revisions(m)
+# on some platforms, this may be more useful
+edit(out(m))
 
-# plot method for slingspans and revisions (see ?plot.seas)
-plot(slidingspans(m))
-plot(revisions(m))
+m <- seas(AirPassengers, slidingspans = list())
+out(m, search = "Sliding spans analysis", n = 300)
 
+# showing the log file
+out(m, file = "log")
+
+# showing the error file
+out(m, file = "err")
 }
 }
 \references{
@@ -85,8 +69,5 @@ Official X-13ARIMA-SEATS manual:
 }
 \seealso{
 \code{\link{seas}} for the main function of seasonal.
-
-\code{\link{plot.seas}}, for plot methods for
-\code{slidingspans} and \code{revisions}.
 }
 

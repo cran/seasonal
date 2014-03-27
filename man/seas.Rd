@@ -28,8 +28,9 @@ seas(x, xreg = NULL, xtrans = NULL, seats.noadmiss = "yes",
 
   \item{transform.function}{spec \code{transform} with
   argument \code{function = "auto"} (default). Automatic
-  log transformation detection.  Set equal to \code{"none"}
-  or \code{"log"} to turn off.}
+  log transformation detection.  Set equal to
+  \code{"none"}, \code{"log"} or any value that is allowed
+  by X-13 to turn off.}
 
   \item{regression.aictest}{spec \code{regression} with
   argument \code{aictest = c("td", "easter")} (default).
@@ -46,7 +47,9 @@ seas(x, xreg = NULL, xtrans = NULL, seats.noadmiss = "yes",
 
   \item{na.action}{a function which indicates what should
   happen when the data contain NAs. \code{na.omit}
-  (default), \code{na.exclude} or \code{na.fail}.}
+  (default), \code{na.exclude} or \code{na.fail}.  If
+  \code{na.action = na.x13}, NA handling is done by X-13,
+  i.e. NA values are substituted by -99999.}
 
   \item{out}{logical, should the X-13ARIMA-SEATS standard
   output be saved in the \code{"seas"} object? (this
@@ -64,19 +67,18 @@ seas(x, xreg = NULL, xtrans = NULL, seats.noadmiss = "yes",
 \value{
 returns an object of class \code{"seas"}, essentially a
 list with the following elements: \item{err}{warning
-messages from X-13ARIMA-SEATS} \item{data}{seasonally
-adjusted data, the raw data, the trend component, the
-irregular component and the seasonal component}
-\item{regressioneffects}{regression variables multiplied by
-the vector of estimated regression coefficients}
+messages from X-13ARIMA-SEATS} \item{series}{a list
+containing the output tables of X-13. To be accessed by the
+\code{series} function.} \item{data}{seasonally adjusted
+data, the raw data, the trend component, the irregular
+component and the seasonal component (deprecated).}
 \item{model}{list with the model specification, similar to
 \code{"spc"}. It typically contains \code{"regression"},
 which contains the regressors and parameter estimates, and
 \code{"arima"}, which contains the ARIMA specification and
 the parameter estimates.} \item{estimates}{detailed
 information on the estimation} \item{lkstats}{summary
-statistics} \item{sfspans}{(optional) data from sliding
-spans analysis} \item{transform.function}{character string,
+statistics} \item{transform.function}{character string,
 applied transformation} \item{fivebestmdl}{five best models
 according to BIC criterion} \item{qs}{QS statistics}
 \item{x}{input series} \item{spc}{object of class
@@ -94,19 +96,22 @@ overview of the regARIMA model.
 Core function of the seasonal package. By default,
 \code{seas} calls the automatic procedures of
 X-13ARIMA-SEATS to perform a seasonal adjustment that works
-well in most circumstances. Through the \code{...}
-argument, it is possible to invoke almost all options that
-are available in X-13ARIMA-SEATS (see details). The default
-options are specified as explicit arguments and are
-discussed in the arguments section.
+well in most circumstances. Via the \code{...} argument, it
+is possible to invoke almost all options that are available
+in X-13ARIMA-SEATS (see details). The default options are
+specified as explicit arguments and are discussed in the
+arguments section.
 }
 \details{
-\emph{seasonal} uses a very similar syntax than the
-official X-13ARIMA-SEATS. The X-13ARIMA-SEATS syntax uses
-\emph{specs} and \emph{arguments}, and each spec optionally
-contains some arguments. In \code{seas}, an additional
-spec-argument can be added by separating spec and argument
-by a dot (\code{.}) (see examples).
+It is possible to use the (almost) complete syntax of
+X-13ARIMA-SEAT via the \code{...} argument. The syntax of
+X-13ARIMA-SEATS uses \emph{specs} and \emph{arguments}, and
+each spec optionally contains some arguments. In
+\code{seas}, an additional spec-argument can be added by
+separating spec and argument by a dot (\code{.}) (see
+examples). Similarily, the \code{\link{series}} function
+can be used to read (almost) every output from
+X-13ARIMA-SEATS.
 
 For a more extensive description, consider the vignette or
 the wiki page, which contains replications of almost all
@@ -117,42 +122,44 @@ examples from the official X-13ARIMA-SEATS manual.
 m <- seas(AirPassengers)
 summary(m)
 
-# invoke X-13ARIMA-SEATS options as 'spec.argument'
+# invoke X-13ARIMA-SEATS options as 'spec.argument' through the ... argument
 # (consult the X-13ARIMA-SEATS manual for many more options and the wiki for
 # for more examples)
 seas(AirPassengers, regression.aictest = c("td"))  # no easter testing
 seas(AirPassengers, force.type = "denton")  # force equality of annual values
 seas(AirPassengers, x11 = list())  # use x11, overrides the 'seats' spec
 
+# options can be entered as vectors
+seas(AirPassengers, regression.variables = c("td1coef", "easter[1]"))
+seas(AirPassengers, arima.model = c(0, 1, 1, 0, 1, 1))
+seas(AirPassengers, arima.model = "(0 1 1)(0 1 1)")     # equivalent
+
 # turn off the automatic procedures
 seas(AirPassengers, regression.variables = c("td1coef", "easter[1]",
 "ao1951.May"), arima.model = "(0 1 1)(0 1 1)", regression.aictest = NULL,
 outlier = NULL, transform.function = "log")
 
-# static replication of the first call
+# static replication of 'm <- seas(AirPassengers)'
 static(m)  # this also tests the equivalence of the static call
-static(m, test = FALSE)  # no testing (useful for debugging)
+static(m, test = FALSE)  # no testing (much faster)
 static(m, coef = TRUE)  # also fixes the coefficients
 
-# extractor functions
+# specific extractor functions
 final(m)
 original(m)
 resid(m)
 coef(m)
-
-# five best models
 fivebestmdl(m)
+out(m)                  # the X-13 .out file (see ?out, for details)
+spc(m)                  # the .spc input file to X-13 (for debugging)
 
-# replicating the default plots in Win X-13
-plot(m)
-plot(m, trend = TRUE)
-monthplot(m)
-monthplot(m, choice = "irregular")
-spectrum(diff(final(m)) )
-spectrum(diff(original(m)))
-residplot(m)
+# universal extractor function for any X-13ARIMA-SEATS output (see ?series)
+series(m, "forecast.forecasts")
 
-# user defined regressors
+# copying the output of X-13 to a user defined directory
+seas(AirPassengers, dir = "~/mydir")
+
+# user defined regressors (see ?genhol for more examples)
 # a temporary level shift in R base
 tls <- ts(0, start = 1949, end = 1965, freq = 12)
 window(tls, start = c(1955, 1), end = c(1957, 12)) <- 1
@@ -161,15 +168,15 @@ seas(AirPassengers, xreg = tls, outlier = NULL)
 seas(AirPassengers, regression.variables = c("tl1955.01-1957.12"),
      outlier = NULL)
 
-# input and output from and to X-13ARIMA-SEATS
-spc(m)  # analyzing the .spc file (for debugging)
-out(m)  # display the .out file (see ?out, for details)
-
 # NA handling
 AirPassengersNA <- window(AirPassengers, end = 1962, extend = TRUE)
 final(seas(AirPassengersNA, na.action = na.omit))    # no NA in final series
 final(seas(AirPassengersNA, na.action = na.exclude)) # NA in final series
 # final(seas(AirPassengersNA, na.action = na.fail))    # fails
+
+# NA handling by X-13 (works with internal NAs)
+AirPassengersNA[20] <- NA
+final(seas(AirPassengersNA, na.action = na.x13))
 
 # inspect tool
 inspect(m)
@@ -190,13 +197,16 @@ Official X-13ARIMA-SEATS manual:
 \code{\link{static}}, to return the static call that is
 needed to replicate an automatic model
 
+\code{\link{series}}, for universal X-13 table series
+import.
+
+\code{\link{out}}, for the import of X-13 text files
+
 \code{\link{inspect}}, to interactively inspect a seasonal
 adjustment model.
 
 \code{\link{plot.seas}}, for diagnostical plots.
 
 \code{\link{qs}}, for diagnostical statistics.
-
-\code{\link{out}}, for diagnostical re-evaluation.
 }
 
