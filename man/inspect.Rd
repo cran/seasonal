@@ -1,14 +1,14 @@
 \name{inspect}
 \alias{inspect}
-\alias{inspect.seas}
 \title{Interactively Inspect a Seasonal Adjustment Model (RStudio only)}
 \usage{
-inspect(x)
-
-\method{inspect}{seas}(x)
+inspect(x, fun = NULL)
 }
 \arguments{
   \item{x}{an object of class \code{"seas"}}
+
+  \item{fun}{a function or a list of functions (see
+  details)}
 }
 \description{
 Interactively inspect a \code{"seas"} object.
@@ -31,6 +31,12 @@ option will double the time for recalculation, as the
 static function also tests the static call each time (this
 is a beta feature of seasonal, which allows intensive
 testing; it may be disabled in future versions).
+
+The views in \code{inspect} may be customized via the
+\code{fun} argument. One or several plot functions may be
+supplied. The plot functions should have a \code{"seas"}
+object as their only argument. Several functions must be
+wrapped in a list (see examples).
 }
 \examples{
 \dontrun{
@@ -39,9 +45,39 @@ m <- seas(AirPassengers)
 
 inspect(m)
 
-# pass arbitrary spec-arguments to inspect:
-m2 <- seas(AirPassengers, estimate.maxiter = 1000)
-inspect(m2)
+
+### customizing inspect
+
+# a single function
+fc <- function(m){
+  ts.plot(series(m, "fct", verbose = FALSE))
+}
+inspect(m, fc)
+
+# more than one function collected in a list
+myfun <- list()
+myfun[['Spectum X-13']] <- function(m){
+  plot(series(m, "spectrum.specorig", verbose = FALSE)[,-1], t = "l")
+}
+myfun[['Spectum R']] <- function(m){
+  spectrum(diff(log(AirPassengers)), method = "ar")
+}
+inspect(m, myfun)
+
+# and a bonus example
+spaghetti <- function(m, back = 10){
+ser <- original(m)
+tx <- time(ser)[(length(ser) - back):length(ser)]
+z <- NULL
+for (txi in tx){
+  assign(as.character(m$call$x), window(ser, end = txi))
+  z <- cbind(z, final(eval(m$call)))
+}
+ts.plot(window(z, start = time(ser)[(length(ser) - back- 15)]),
+        col = rainbow(back + 1))
+}
+inspect(m, spaghetti)
+
 }
 }
 \references{

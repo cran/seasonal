@@ -1,18 +1,21 @@
 #' Outlier Time series
 #' 
-#' Returns an object of class \code{"ts"} that contains the names of the outliers.
+#' Returns an object of class \code{"ts"} that contains the names of the
+#' outliers.
 #' 
-#' @param x   an object of class \code{"seas"}.
-#' 
+#' @param x      an object of class \code{"seas"}.
+#' @param full   logical, should the full label of the outlier be shown? If
+#'   \code{FALSE}, only the type of the outlier is shown.
+#'   
 #' @return character string time series with outliers.
-#' 
+#'   
 #' @export
 #' @examples
 #' \dontrun{
 #' x <- seas(AirPassengers)
 #' outlier(x)
 #' }
-outlier <- function(x){
+outlier <- function(x, full = FALSE){
   stopifnot(inherits(x, "seas"))
 
   ol <- x$model$regression$variables[grepl("\\.", x$model$regression$variables)]
@@ -43,8 +46,13 @@ outlier <- function(x){
   stopifnot(length(ol.time.R) == length(ol))
   
   for (i in 1:length(ol.time.R)){
-    window(z, start = as.numeric(ol.time.R[[i]]), 
-           end = as.numeric(ol.time.R[[i]])) <- toupper(ol.type[i])
+    if (!full){
+      window(z, start = as.numeric(ol.time.R[[i]]), 
+             end = as.numeric(ol.time.R[[i]])) <- toupper(ol.type[i])
+    } else {
+      window(z, start = as.numeric(ol.time.R[[i]]), 
+             end = as.numeric(ol.time.R[[i]])) <- ol[i]
+    }
   }
   
   z

@@ -1,0 +1,31 @@
+\name{identify.seas}
+\alias{identify.seas}
+\title{Manually Identify Outliers (Experimental)}
+\usage{
+\method{identify}{seas}(x, type = c("ao", "tc", "ls"), ...)
+}
+\arguments{
+  \item{x}{an object of class \code{"seas"}.}
+
+  \item{type}{character vector, types of outlier to loop
+  through.}
+
+  \item{...}{unused, for compatibility with the generic
+  function.}
+}
+\value{
+an object of class \code{"seas"}, containing the static
+call of the selected model.
+}
+\description{
+Select or deselect outliers by point and click. To quit and
+return the call, press ESC. Click several times to loop
+through different outlier types.
+}
+\examples{
+\dontrun{
+ m <- seas(AirPassengers)
+ identify(m)
+}
+}
+

@@ -23,7 +23,7 @@
 #'   description.
 #' @param \dots   further arguments passed to the plotting functions.
 #'   
-#' @return All plot functions returns a plot as their side effect.
+#' @return All plot functions return a plot as their side effect.
 #'   
 #' @seealso \code{\link{seas}}, for the main function.
 #' @seealso \code{\link{qs}}, for diagnostical statistics.
@@ -63,7 +63,8 @@
 #' plot(density(resid(m)))
 #' qqnorm(resid(m))
 #' }
-plot.seas <- function(x, outliers = TRUE, trend = FALSE, main = "unadjusted and seasonally adjusted series",...){
+plot.seas <- function(x, outliers = TRUE, trend = FALSE, 
+                      main = "unadjusted and seasonally adjusted series", ...){
 
   ts.plot(cbind(original(x), final(x)), 
           col = c("black", "red"), 
