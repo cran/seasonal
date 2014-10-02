@@ -1,6 +1,6 @@
 #' Diagnostical Statistics
 #' 
-#' Functions to access some specific diagnostical statics in a \code{"seas"} object.  
+#' Functions to access some specific diagnostical statistics in a \code{"seas"} object.  
 #' For universal import of X-13ARIMA-SEATS tables, use the \code{\link{series}} function. For 
 #' accessing the \code{.out} file of X-13ARIMA-SEATS, use the \code{\link{out}} 
 #' function. For diagnostical plots, see \code{\link{plot.seas}}.
@@ -19,9 +19,11 @@
 #'   activated, the function tries to re-evaluate the model with 
 #'   the \code{automdl} spec activated.
 #'   
-#' @return \code{arimamodel} retrurs the structure of a the ARIMA model, a 
+#' @return \code{arimamodel} returns the structure of a the ARIMA model, a 
 #'   numerical vector of the form \code{(p d q)(P D Q)}, containing the 
 #'   non-seasonal and seasonal part of the ARIMA model.
+#'   
+#' @return \code{transformfunction} returns the transform function that has been applied.
 #'   
 #' @seealso \code{\link{seas}} for the main function.
 #' @seealso \code{\link{series}}, for universal X-13 output extraction.
@@ -47,6 +49,7 @@
 #' spc(m)
 #' fivebestmdl(m)
 #' arimamodel(m)
+#' transformfunction(m)
 #' 
 #' # if no automdl spec is present, the model is re-evaluated
 #' m2 <- seas(AirPassengers, arima.model = "(0 1 1)(0 1 1)")
@@ -62,7 +65,11 @@
 #' }
 #' @export
 qs <- function(x){
-  x$qs
+  z0 <- x$udg[grepl("^qs", names(x$udg))]
+  z <- read.table(text = z0, colClasses = "numeric")
+  rownames(z) <- names(z0)
+  colnames(z) <- c("qs", "p-val")
+  z
 }
 
 
@@ -77,10 +84,24 @@ spc <- function(x){
 #' @export
 fivebestmdl <- function(x){
   if (!is.null(x$fivebestmdl)){
-    txt <- x$fivebestmdl[3:7]
-    arima <- substr(txt, start = 19, stop = 32)
-    bic <- as.numeric(substr(txt, start = 51, stop = 56))
-    z <- data.frame(arima, bic, stringsAsFactors = FALSE)
+    if (getOption("htmlmode") == 1){
+      txt <- x$fivebestmdl[4:8]
+
+      arima.st <- regexpr("Model \\#  \\d : ", txt) + 13
+      arima.en <- regexpr(" \\(<abbr", txt) - 1
+      arima <- substr(txt, start = arima.st, stop = arima.en)
+      
+      bic.st <- regexpr("</abbr> = ", txt) + 10
+      bic.en <- regexpr("\\) <br> ", txt) - 1
+      bic <- as.numeric(substr(txt, start = bic.st, stop = bic.en))
+      z <- data.frame(arima, bic, stringsAsFactors = FALSE)
+    } else {
+      txt <- x$fivebestmdl[3:7]
+      arima <- substr(txt, start = 19, stop = 32)
+      arima <- gsub(" *$", "", arima) 
+      bic <- as.numeric(substr(txt, start = 51, stop = 56))
+      z <- data.frame(arima, bic, stringsAsFactors = FALSE)
+    }
   } else if (is.null(x$reeval)) {
     # if no fivebestmdl, try reevaluating with automdl
     lc <- as.list(x$call)
@@ -99,11 +120,14 @@ fivebestmdl <- function(x){
 
 
 
+
+
+
 #' @rdname qs
 #' @export
 arimamodel <- function(x){
   stopifnot(inherits(x, "seas"))
-  str <- x$model$arima$model
+  str <- x$mdl$arima$model
   str <- gsub("[ \\(\\)]", "", str)
   z <- c(substr(str, 1, 1),
          substr(str, 2, 2),
@@ -115,4 +139,25 @@ arimamodel <- function(x){
   as.numeric(z)
 }
 
+
+
+#' @rdname qs
+#' @export
+transformfunction <- function(x){
+  stopifnot(inherits(x, "seas"))
+  if (is.null(x$spc$transform$`function`)){
+    stop("no transform function, investigate!")
+  }
+  
+  if (x$spc$transform$`function` == "auto"){
+    if (grepl("Log", x$udg['aictrans'])){
+      z <- "log"
+    } else {
+      z <- "none"
+    }
+  } else {
+    z <- x$spc$transform$`function`
+  }
+  z
+}
 

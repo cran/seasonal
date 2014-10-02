@@ -1,18 +1,20 @@
 #' Seasonal Adjustment with X-13ARIMA-SEATS
 #' 
-#' Core function of the seasonal package. By default, \code{seas} calls the 
+#' Core function of the seasonal package. With the default options, \code{seas} calls the 
 #' automatic procedures of X-13ARIMA-SEATS to perform a seasonal adjustment that
 #' works well in most circumstances. Via the \code{...} argument, it is possible
 #' to invoke almost all options that are available in X-13ARIMA-SEATS (see 
-#' details). The default options are specified as explicit arguments and are 
+#' details). The default options of \code{seas} are listed as explicit arguments and are 
 #' discussed in the arguments section.
 #' 
-#' It is possible to use the (almost) complete syntax of X-13ARIMA-SEAT via the 
+#' It is possible to use the almost complete syntax of X-13ARIMA-SEAT via the 
 #' \code{...} argument. The syntax of X-13ARIMA-SEATS uses \emph{specs} and 
 #' \emph{arguments}, and each spec optionally contains some arguments. In 
 #' \code{seas}, an additional spec-argument can be added by separating spec and 
-#' argument by a dot (\code{.}) (see examples). Similarily, the 
-#' \code{\link{series}} function can be used to read (almost) every output from 
+#' argument by a dot (\code{.}) (see examples). 
+#' 
+#' Similarily, the 
+#' \code{\link{series}} function can be used to read almost all series from 
 #' X-13ARIMA-SEATS.
 #' 
 #' For a more extensive description, consider the vignette or the wiki page, 
@@ -28,21 +30,22 @@
 #'   together with \code{xreg}.
 #' @param seats.noadmiss   spec 'seats' with argument \code{noadmiss = "yes"} 
 #'   (default). Seasonal adjustment by SEATS, if SEATS decomposition is invalid,
-#'   an alternative model is used (a warning is given).
+#'   an alternative model is used (a message is returned). If \code{noadmiss =
+#'   "no"}, no approximation is done.
 #' @param transform.function   spec \code{transform} with argument 
 #'   \code{function = "auto"} (default). Automatic log transformation detection.
 #'   Set equal to \code{"none"}, \code{"log"} or any value that is allowed by 
-#'   X-13 to turn off.
+#'   X-13 to turn it off.
 #' @param regression.aictest   spec \code{regression} with argument 
 #'   \code{aictest = c("td", "easter")} (default). AIC test for trading days and
-#'   Easter effects. Set equal to \code{NULL} to turn off.
+#'   Easter effects. Set equal to \code{NULL} to turn it off.
 #' @param outlier   spec \code{outlier} without arguments (default). Automatic 
-#'   oulier detection. Set equal to \code{NULL} to turn off.
+#'   oulier detection. Set equal to \code{NULL} to turn it off.
 #' @param automdl   spec \code{automdl} without arguments (default). Automatic 
-#'   model search with the automdl spec. Set equal to \code{NULL} to turn off.
+#'   model search with the automdl spec. Set equal to \code{NULL} to turn it off.
 #' @param na.action  a function which indicates what should happen when the data
 #'   contain NAs. \code{na.omit} (default), \code{na.exclude} or \code{na.fail}.
-#'   If \code{na.action = na.x13}, NA handling is done by X-13, i.e. NA values
+#'   If \code{na.action = na.x13}, NA handling is done by X-13, i.e. NA values 
 #'   are substituted by -99999.
 #' @param out   logical, should the X-13ARIMA-SEATS standard output be saved in 
 #'   the \code{"seas"} object? (this increases object size substantially, it is 
@@ -55,25 +58,32 @@
 #'   details).
 #'   
 #' @return returns an object of class \code{"seas"}, essentially a list with the
-#'   following elements: \item{err}{warning messages from X-13ARIMA-SEATS} 
+#'   following elements: 
+
 #'   \item{series}{a list containing the output tables of X-13. To be accessed 
-#'   by the \code{series} function.} \item{data}{seasonally adjusted data, the 
+#'   by the \code{series} function.} 
+#'   \item{data}{seasonally adjusted data, the 
 #'   raw data, the trend component, the irregular component and the seasonal 
-#'   component (deprecated).} \item{model}{list with the model specification, 
+#'   component (deprecated).} 
+#'   \item{err}{warning messages from X-13ARIMA-SEATS} 
+#'   \item{udg}{content of the \code{.udg} output file} 
+#'   \item{est}{content of the \code{.est} output file} 
+#'   \item{lks}{content of the \code{.lks} output file} 
+#'   \item{model}{list with the model specification, 
 #'   similar to \code{"spc"}. It typically contains \code{"regression"}, which 
 #'   contains the regressors and parameter estimates, and \code{"arima"}, which 
 #'   contains the ARIMA specification and the parameter estimates.} 
-#'   \item{estimates}{detailed information on the estimation} 
-#'   \item{lkstats}{summary statistics} \item{transform.function}{character 
-#'   string, applied transformation} \item{fivebestmdl}{five best models 
-#'   according to BIC criterion} \item{qs}{QS statistics} \item{x}{input series}
-#'   \item{spc}{object of class \code{"spclist"}, a list containing everything 
-#'   that is send to X-13ARIMA-SEATS. Each spec is on the first level, each 
-#'   argument is on the second level.} \item{call}{function call}
+#'   \item{fivebestmdl}{Best Five ARIMA Models (unparsed)} 
+#'   \item{x}{input series}
+#'   \item{spc}{object of class \code{"spclist"}, a list containing the content of the \code{.spc} file that is
+#'   used by X-13ARIMA-SEATS. Each spec is on the first level, each 
+#'   argument is on the second level.} 
+#'   \item{call}{function call}
+#'   \item{wdir}{temporary directory in which X-13ARIMA-SEATS has been run}
 #'   
 #'   The \code{final} function returns the final adjusted series, the 
 #'   \code{plot} method shows a plot with the unadjusted and the adjusted 
-#'   series. \code{summary} gives an overview of the regARIMA model.
+#'   series. \code{summary} gives an overview of the regARIMA model. 
 #'   
 #' @seealso \code{\link{static}}, to return the static call that is needed to 
 #'   replicate an automatic model
@@ -91,6 +101,7 @@
 #'   manual: 
 #'   \url{https://github.com/christophsax/seasonal/wiki/Examples-of-X-13ARIMA-SEATS-in-R}
 #'   
+#'   
 #'   Official X-13ARIMA-SEATS manual: 
 #'   \url{http://www.census.gov/ts/x13as/docX13AS.pdf}
 #' @export
@@ -105,7 +116,7 @@
 #' # for more examples)
 #' seas(AirPassengers, regression.aictest = c("td"))  # no easter testing
 #' seas(AirPassengers, force.type = "denton")  # force equality of annual values
-#' seas(AirPassengers, x11 = list())  # use x11, overrides the 'seats' spec
+#' seas(AirPassengers, x11 = "")  # use x11, overrides the 'seats' spec
 #' 
 #' # options can be entered as vectors
 #' seas(AirPassengers, regression.variables = c("td1coef", "easter[1]"))
@@ -161,17 +172,21 @@
 #' }
 #' 
 seas <- function(x, xreg = NULL, xtrans = NULL, 
-                 seats.noadmiss = "yes", transform.function = "auto", 
-                 regression.aictest = c("td", "easter"), outlier = list(), 
-                 automdl = list(), na.action = na.omit,
-                 out = FALSE, dir = NULL, ...){
-
+         seats.noadmiss = "yes", transform.function = "auto", 
+         regression.aictest = c("td", "easter"), outlier = "", 
+         automdl = "", na.action = na.omit,
+         out = FALSE, dir = NULL, ...){
+  
   # intial checks
-  checkX13(fail = TRUE, full = FALSE)
+  checkX13(fail = TRUE, fullcheck = FALSE, htmlcheck = FALSE)
   if (!inherits(x, "ts")){
-    stop("'x' is not a time series.")
+    stop("first argument is not a time series.")
   }
-
+  
+  if (start(x)[1] <= 1000){
+    stop("start year of 'x' must be > 999.")
+  }
+  
   # lookup table for output specification
   SPECS <- NULL 
   data(specs, envir = environment())  # avoid side effects
@@ -191,14 +206,14 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
     dir.create(wdir)
   }
   file.remove(list.files(wdir, full.names = TRUE))
-
+  
   # file names for 
   iofile <- file.path(wdir, "iofile")      # inputs and outputs (w/o suffix)
   datafile <- file.path(wdir, "data.dta")  # series to adjust
   # user defined variables
   xreg.file <- file.path(wdir, "xreg.dta")  
   xtrans.file <- file.path(wdir, "xtrans.dta")       
-  
+
   ### write data
   write_ts_dat(x.na, file = datafile)
   
@@ -215,16 +230,16 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
   # add the default options
   spc$transform$`function` <- transform.function
   spc$regression$aictest <- regression.aictest
-  spc$outlier <- outlier
-  spc$automdl <- automdl
   spc$seats$noadmiss <- seats.noadmiss
+  
+  spc <- mod_spclist(spc, outlier = outlier, automdl = automdl)
   
   # add user defined options
   spc <- mod_spclist(spc, ...)
-
+  
   # remove double entries, adjust outputs
   spc <- consist_spclist(spc)
-
+  
   ### user defined regressors
   if (!is.null(xreg)){
     if (frequency(xreg) != frequency(x)){
@@ -237,7 +252,7 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
     } else {
       user <- colnames(xreg)
     }
-
+    
     if (!is.null(spc$regression)){
       spc$regression$user <- user
       spc$regression$file <- paste0("\"", xreg.file, "\"")
@@ -248,7 +263,7 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
       spc$x11regression$format <- "\"datevalue\""
     }
   }
-    
+  
   if (!is.null(xtrans)){
     if (frequency(xtrans) != frequency(x)){
       stop('xtrans and x must be of the same frequency.')
@@ -268,12 +283,12 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
   ### write spc
   spctxt <- deparse_spclist(spc)
   writeLines(spctxt, con = paste0(iofile, ".spc"))
-
-  ### Run X13
-  run_x13(iofile)
-
-  flist <- list.files(wdir)
-
+  
+  ### Run X13, either with full output or not
+  run_x13(iofile, out)
+  
+  flist <- list.files(wdir) # all files produced by X-13
+  
   ### Save output files if 'dir' is specified
   if (!is.null(dir)){
     if (!file.exists(dir)){
@@ -284,17 +299,26 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
   }
   
   ### Import from X13
-  z <- list()
-  class(spc) <- c("spclist", "list")
+  z <- list()  # output object
   
-  # add all series that are specified in SERIES_SUFFIX
+  # check wether there is output at all.
+  outfile <- if (getOption("htmlmode") == 1){
+    paste(iofile, ".html", sep = "")
+  } else {
+    paste(iofile, ".out", sep = "")
+  }
+  if (!file.exists(outfile)){
+    stop("no output has been generated")
+  }
+  
+  # add all series that have been produced and are specified in SERIES_SUFFIX
   file.suffix <- unlist(lapply(strsplit(flist, "\\."), function(x) x[[2]]))
   is.series <- file.suffix %in% SERIES_SUFFIX
   series.list <- lapply(file.path(wdir, flist[is.series]), read_series, 
                         frequency = frequency(x))
   names(series.list) <- file.suffix[is.series]
   z$series <- series.list
-    
+  
   # data tables (names depend on method, thus a separate call is needed)
   if (!is.null(spc$seats)){
     z$data <- read_data(method = "seats", file = iofile, frequency(x))
@@ -303,15 +327,18 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
   } 
   
   # read errors/warnings
-  z$err <-  readLines(paste0(iofile, ".err"))
-  
-  # stop on error
-  if (any(grepl("ERROR:", z$err)) | is.null(z$data)){
+  if (getOption("htmlmode") == 1){
+    errtxt <- readLines(paste0(iofile, "_err.html"))
+  } else {
+    errtxt <- readLines(paste0(iofile, ".err"))
+  }
+  z$err <- detect_error(errtxt)
+
+  if (length(z$err$err) > 0){
     cat("Error while reading the following .spc file:\n\n")
     print(spc)
     cat("\n\n\n")
-    message(paste("Error messages generated by X-13ARIMA-SEATS:\n", 
-              paste(z$err[-(1:4)], collapse = "\n")))
+    print(z$err)
     if (is.null(z$data)){
       stop("no series has been generated")
     } else {
@@ -319,62 +346,63 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
     }
   }
   
-  # read big output file...
-  outtxt <-  readLines(paste0(iofile, ".out"), encoding = "UTF-8")
+  # read .udg file
+  z$udg <- read_udg(iofile)
   
-  # ...and warn if model choosen by seats is different
-  if (any(grepl("Model used for SEATS decomposition is different", z$err))){
-    warning(paste("Model used for SEATS decomposition is different:\n", 
-                  detect_seatsmdl(outtxt)))
+  # read .log file
+  if (getOption("htmlmode") != 1){
+    z$log <-  readLines(paste0(iofile, ".log"), encoding = "UTF-8")
   }
   
-  # read the log file
-  z$log <-  readLines(paste0(iofile, ".log"), encoding = "UTF-8")
-  class(z$log) <- "out"
-  
-  # check whether freq detection in read_series has worked.
-  stopifnot(frequency(z$data) == frequency(x))
+  # read .est file
+  z$est <- read_est(iofile)
 
-  # read additional output files
+  # read .lks file
+  z$lks <- read_lks(iofile)
+
+  # read .mdl file
   z$model <- try(read_mdl(iofile), silent = TRUE) 
   # fails for very complicated models, but is needed only for static()
-  if (inherits(z$model, "try-error")){
+  if (inherits(z$mdl, "try-error")){
     z$model <- NULL
   }
-  z$estimates <- read_est(iofile)
-  z$lkstats <- read_lks(iofile)
-  
-  # additional information from outtxt 
-  # (this is part of the output, outtxt is not kept by default)
-  if (transform.function == "auto"){
-    z$transform.function <- detect_auto(outtxt)
-  } else {
-    z$transform.function <- transform.function
+
+  # read .out file (will be returned only if out = TRUE)
+  outtxt <-  readLines(outfile, encoding = "UTF-8")
+
+  # always keep fivebestmdl
+  z$fivebestmdl <- detect_fivebestmdl(outtxt)  
+
+  ### Checks
+
+  # check if model choosen by seats is identical
+  if (any(grepl("Model used for SEATS decomposition is different", z$err))){
+    message(paste("Model used in SEATS is different:", z$udg['seatsmdl']))
   }
-  z$fivebestmdl <- detect_fivebestmdl(outtxt)
-  z$qs <- detect_qs(outtxt)
-  
+
+  # check if freq detection in read_series has worked
+  if (frequency(z$data) != as.numeric(z$udg['freq'])){
+    stop("Frequency of imported data (", frequency(z$data), ") is not equal to frequency of detected by X-13 (", as.numeric(z$udg['freq']), ").")
+  }
 
   ### final additions to output
-  
   if (!is.null(attr(x.na, "na.action"))){
     z$na.action <- attr(x.na, "na.action")
   }
   
   if (out){
-    outtxt[grepl("^\f", outtxt)] <- ""  # remove page breaks
     z$out <-  outtxt
-    class(z$out) <- "out"
   }
-    
-  z$x <- x  # input series
+
+  z$x <- x
   z$spc <- spc
   z$call <- match.call()
+  z$wdir <- wdir
   class(z) <- "seas"
   z
 }
 
-run_x13 <- function(file){
+run_x13 <- function(file, out){
   # run X-13ARIMA-SEATS platform dependently
   # 
   # file  character, full filename w/o suffix
@@ -382,15 +410,28 @@ run_x13 <- function(file){
   # run X-13 as a side effect
   #
   # required by seas
-
+  
   env.path <- Sys.getenv("X13_PATH")
+    
+  # -n no tables
+  # -s store additional output (.udg file)
+  flags <- if (out) {"-s"} else {"-n -s"}
   if (.Platform$OS.type == "windows"){
-    x13.bin <- paste0("\"", file.path(env.path, "x13as.exe"), "\"")
-    shell(paste(x13.bin, file), intern = TRUE)
+    if (getOption("htmlmode") == 1){
+      x13.bin <- paste0("\"", file.path(env.path, "x13ashtml.exe"), "\"")
+    } else {
+      x13.bin <- paste0("\"", file.path(env.path, "x13as.exe"), "\"")
+    }
+    shell(paste(x13.bin, file, flags), intern = TRUE)
   } else {
-    x13.bin <- file.path(env.path, "x13as")
-    system(paste(x13.bin, file), intern = TRUE)
+    if (getOption("htmlmode") == 1){
+      # ignore case on unix to avoid problems with different binary names
+      fl <- list.files(env.path)
+      x13.bin <- file.path(env.path, fl[grepl("^x13ashtml$", fl, ignore.case = TRUE)])
+    } else {
+      x13.bin <- file.path(env.path, "x13as")
+    }
+    system(paste(x13.bin, file, flags), intern = TRUE, ignore.stderr = TRUE)
   }
 }
-
 

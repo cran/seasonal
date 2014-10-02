@@ -22,8 +22,8 @@
 
 \title{\textbf{seasonal}: R interface to X-13ARIMA-SEATS}
 
-\author{Christoph Sax\footnote{State Secretariat of Economic Affairs, Switzerland}
-}
+\author{Christoph Sax}
+
 
 \date{\today}
 \maketitle

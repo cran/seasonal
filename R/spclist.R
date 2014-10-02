@@ -9,6 +9,7 @@ mod_spclist <- function(x, ...){
   # required by seas
   stopifnot(inherits(x, "spclist"))
   
+  
   mod.list <- list(...)
   
   for (i in seq_along(mod.list)){
@@ -27,7 +28,15 @@ mod_spclist <- function(x, ...){
     }
     
     if (length(split.names.i[[1]]) == 1){
-      x[[spc.name]] <- content.i
+      if (length(content.i) == 1){
+          if (content.i == ""){
+            x[[spc.name]] <- list()
+          } else {
+            x[[spc.name]] <- content.i
+          }
+      } else {
+        x[[spc.name]] <- content.i
+      }
     } else if (length(split.names.i[[1]]) == 2){
       spc.arg <- split.names.i[[1]][2]
       if (is.null(x[[spc.name]][[spc.arg]])){
@@ -39,7 +48,7 @@ mod_spclist <- function(x, ...){
         x[[spc.name]][[spc.arg]] <- unique(c(x[[spc.name]][[spc.arg]], content.i))
       }
     } else {
-      stop("X-13ARIMA-SEATA options should contain a spec and an optional argument after the dot.")
+      stop("X-13ARIMA-SEATS options should contain a spec and an optional argument after the dot.")
     }
   }
   x
@@ -83,6 +92,12 @@ consist_spclist <-function(x){
                                         "residuals"))
   
   
+  x <- mod_spclist(x, spectrum.print = "qs")
+  
+  x <- mod_spclist(x, transform.print = "aictransform")
+  
+
+  
   ### ensure arima.model is character
   if (!is.null(x$arima$model)){
     x$arima$model <- as.character.arima(x$arima$model)
@@ -92,7 +107,7 @@ consist_spclist <-function(x){
   ### spec specific output modification
   
   if (!is.null(x$seats)){
-    x <- mod_spclist(x, seats.save = c("s10", "s11", "s12", "s13", "s16", "s18"))
+    x <- mod_spclist(x, seats.save = c("s10", "s11", "s12", "s13", "s16", "s18"))    
   } 
   
   if (!is.null(x$x11)){
@@ -106,6 +121,5 @@ consist_spclist <-function(x){
   if (!is.null(x$force)){
     x <- mod_spclist(x, force.save = "saa")
   }
-  
   x
 }

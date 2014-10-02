@@ -27,8 +27,15 @@ read_data <- function(method = "seats", file, frequency){
   } else {
     final <- seasonaladj
   }
-
-  cbind(final, seasonal, seasonaladj, trend, irregular, adjustfac)
+  
+  if (is.null(final)){
+    stop("No final series generated.")
+  }
+  
+  # remove NULL elements, because cbind cannot handle them
+  ll <- list(final = final, seasonal = seasonal, seasonaladj = seasonaladj, trend = trend, irregular = irregular, adjustfac = adjustfac)
+  lll <- ll[!unlist(lapply(ll, is.null))]
+  do.call(cbind, lll)
 }
 
 
@@ -62,14 +69,6 @@ read_series <- function(file, frequency){
   if (nchar(time.raw[1]) == 6){  # time series
     year <- substr(time.raw, start = 1, stop = 4)
     per <- substr(time.raw, start = 5, stop = 6)
-    
-#     frequency <- length(unique(per))
-#     if (length(per) / 12 < 1) { 
-#       # this is an unlikely case. X-13 probably probably does not allow such a
-#       # short series.
-#       warning("Frequency determination is unclear. Assuming monthly data.")
-#       frequency <- 12
-#     }
     
     time <- as.numeric(year) + (as.numeric(per) - 1) / frequency
     z <- ts(dta[, -1], start = time[1], frequency = frequency)

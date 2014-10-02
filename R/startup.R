@@ -1,5 +1,5 @@
 .onLoad <- function(...){
-  checkX13(full = FALSE)
+  checkX13(fullcheck = FALSE, htmlcheck = TRUE)
 }
 
 

@@ -43,7 +43,9 @@
 #' }
 static <- function(x, coef = FALSE, test = TRUE, verbose = FALSE){
   
-  stopifnot(inherits(x, "seas"))
+  if (!inherits(x, "seas")){
+    stop("first argument must be of class 'seas'")
+  }
   
   lc <- as.list(x$call)  
 
@@ -64,7 +66,7 @@ static <- function(x, coef = FALSE, test = TRUE, verbose = FALSE){
   lc['outlier'] <- NULL
   names(lc['outlier']) <- "outlier"
 
-  lc$transform.function = x$transform.function
+  lc$transform.function = transformfunction(x)
 
   if (coef){
     if (!is.null(x$model$regression$b)) {
