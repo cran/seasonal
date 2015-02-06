@@ -1,3 +1,26 @@
+0.80.0  2015-02-05
+
+enhancements
+- improved parsing and intergration of X-13 error messages
+- checkX13 performs more tests and returns an error report.
+- spec-arguments can also be entered as a named list (experimental)
+
+under the hood
+- automated tests for all calls in the wiki
+
+documentation
+- new vignette sections on user defined holidays and production use
+- new example on Indian Diwali in ?genhol
+- dates of Indian Diwali and Indian industrial production
+- more detailed documentation for ?summary.seas explaining output details
+
+bug fixes
+- genhol() can be used inside a seas() call
+- arimamodel() shows model as expected
+
+defunct
+- slidingspans, revisions, regressioneffects changed from deprecated to defunct
+
 0.70.1  2014-10-02
 
 new features
@@ -56,7 +79,7 @@ deprecated
 - the functionality of 'slidingspans', 'revisions' and 'regressioneffects' is now part of the new 'series' function. The old functions are deprecated.
 
 code improvements
-- code takes advantage of the series function, simplified import from X-13.
+- code takes advantage of the series function, simplified import from X-13
 
 
 0.40.0  2014-02-12

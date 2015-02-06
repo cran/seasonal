@@ -1,20 +1,18 @@
 
-mod_spclist <- function(x, ...){
+mod_spclist <- function(x, list){
   # Add one or several X-13ARIMA-SEATS specs/arguments to a spclist
   #
   # x  "spclist" object
+  # list named list with additional spec.argument combinations
   #
   # returns a "spclist"
   #
   # required by seas
   stopifnot(inherits(x, "spclist"))
   
-  
-  mod.list <- list(...)
-  
-  for (i in seq_along(mod.list)){
-    content.i <- mod.list[[i]]
-    names.i <- names(mod.list)[i]
+  for (i in seq_along(list)){
+    content.i <- list[[i]]
+    names.i <- names(list)[i]
     
     split.names.i <- strsplit(names.i, "\\.")
     
@@ -39,6 +37,9 @@ mod_spclist <- function(x, ...){
       }
     } else if (length(split.names.i[[1]]) == 2){
       spc.arg <- split.names.i[[1]][2]
+      if (!is.list(x[[spc.name]])){
+        stop("Specification of ", spc.name, " without a dot is not allowed in this context.")
+      }
       if (is.null(x[[spc.name]][[spc.arg]])){
         x[[spc.name]][[spc.arg]] <- list()
       }
@@ -67,7 +68,7 @@ consist_spclist <-function(x){
   # required by seas
   
   stopifnot(inherits(x, "spclist"))
-  
+
   ### avoid mutually exclusive alternatives
   
   # priority: 1. arima, 2. pickmdl, 3. automdl (default)
@@ -88,16 +89,16 @@ consist_spclist <-function(x){
 
   ### general output modification
   
-  x <- mod_spclist(x, estimate.save = c("model", "estimates", "lkstats", 
-                                        "residuals"))
+  x <- mod_spclist(x, list = list(estimate.save = c("model", "estimates", "lkstats", 
+                                        "residuals")))
   
   
-  x <- mod_spclist(x, spectrum.print = "qs")
+  x <- mod_spclist(x, list = list(spectrum.print = "qs"))
   
-  x <- mod_spclist(x, transform.print = "aictransform")
+  x <- mod_spclist(x, list = list(transform.print = "aictransform"))
   
 
-  
+
   ### ensure arima.model is character
   if (!is.null(x$arima$model)){
     x$arima$model <- as.character.arima(x$arima$model)
@@ -107,19 +108,20 @@ consist_spclist <-function(x){
   ### spec specific output modification
   
   if (!is.null(x$seats)){
-    x <- mod_spclist(x, seats.save = c("s10", "s11", "s12", "s13", "s16", "s18"))    
+    x <- mod_spclist(x, list = list(seats.save = c("s10", "s11", "s12", "s13", "s16", "s18")))    
   } 
   
   if (!is.null(x$x11)){
-    x <- mod_spclist(x, x11.save = c("d10", "d11", "d12", "d13", "d16", "e18"))
+
+    x <- mod_spclist(x, list = list(x11.save = c("d10", "d11", "d12", "d13", "d16", "e18")))
   } 
   
   if (!is.null(x$automdl)){
-    x <- mod_spclist(x, automdl.print = "bestfivemdl")
+    x <- mod_spclist(x, list = list(automdl.print = "bestfivemdl"))
   }
   
   if (!is.null(x$force)){
-    x <- mod_spclist(x, force.save = "saa")
+    x <- mod_spclist(x, list = list(force.save = "saa"))
   }
   x
 }

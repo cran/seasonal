@@ -11,7 +11,8 @@
 #' \code{...} argument. The syntax of X-13ARIMA-SEATS uses \emph{specs} and 
 #' \emph{arguments}, and each spec optionally contains some arguments. In 
 #' \code{seas}, an additional spec-argument can be added by separating spec and 
-#' argument by a dot (\code{.}) (see examples). 
+#' argument by a dot (\code{.}) (see examples). Alternatvily, spec-argument 
+#' combinations can be supplied as a named list, which is useful for programming.
 #' 
 #' Similarily, the 
 #' \code{\link{series}} function can be used to read almost all series from 
@@ -56,10 +57,12 @@
 #'   debugging.
 #' @param ...  additional spec-arguments options sent to X-13ARIMA-SEATS (see 
 #'   details).
-#'   
+#' @param list  a named list with additional spec-arguments options. This is an
+#'   alternative to the \code{...} argument. It is useful for programming.
+#'   (experimental)
+#'
 #' @return returns an object of class \code{"seas"}, essentially a list with the
 #'   following elements: 
-
 #'   \item{series}{a list containing the output tables of X-13. To be accessed 
 #'   by the \code{series} function.} 
 #'   \item{data}{seasonally adjusted data, the 
@@ -117,7 +120,12 @@
 #' seas(AirPassengers, regression.aictest = c("td"))  # no easter testing
 #' seas(AirPassengers, force.type = "denton")  # force equality of annual values
 #' seas(AirPassengers, x11 = "")  # use x11, overrides the 'seats' spec
-#' 
+#'
+#' # 'spec.argument' combinations can also be supplied as a named list
+#' # (useful for programming)
+#' seas(AirPassengers, list = list(regression.aictest = c("td")))
+#' seas(list = list(x = AirPassengers, force.type = "denton"))
+#'
 #' # options can be entered as vectors
 #' seas(AirPassengers, regression.variables = c("td1coef", "easter[1]"))
 #' seas(AirPassengers, arima.model = c(0, 1, 1, 0, 1, 1))
@@ -175,17 +183,10 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
          seats.noadmiss = "yes", transform.function = "auto", 
          regression.aictest = c("td", "easter"), outlier = "", 
          automdl = "", na.action = na.omit,
-         out = FALSE, dir = NULL, ...){
+         out = FALSE, dir = NULL, ..., list = NULL){
   
   # intial checks
   checkX13(fail = TRUE, fullcheck = FALSE, htmlcheck = FALSE)
-  if (!inherits(x, "ts")){
-    stop("first argument is not a time series.")
-  }
-  
-  if (start(x)[1] <= 1000){
-    stop("start year of 'x' must be > 999.")
-  }
   
   # lookup table for output specification
   SPECS <- NULL 
@@ -194,9 +195,49 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
   
   # save series name
   series.name <- deparse(substitute(x))
-  # remove quotes, they are not allowed in X-13as
+
+  # remove quotes in series.name, they are not allowed in X-13as
   series.name <- gsub('[\'\\"]', '', series.name)
+
+  # using the list argument instead of '...''
+  if (is.null(list)){
+    list <- list(...)
+  } else {
+    if (!inherits(list, "list")){
+      stop("the 'list' argument mus be of class 'list'")
+    }
+    if (length(names(list)) != length(list)){
+      stop("all spec.argument combinations in 'list' must be named")
+    }
+    # overwrite defaults if specified in the list
+    dl <- names(list)[names(list) %in% names(formals(seas))]
+    for (dli in dl){
+      assign(dli, list[[dli]])
+    }
+    if ("list" %in% dl){
+      stop("no 'list' argument inside the 'list' argument allowed")
+    }
+    if (length(list(...) > 0)){
+      warning("if 'list' is specified, spec.argument combinations delivered to '...' are ignored.")
+    }
+    if ("x" %in% dl){
+      series.name <- "ser"
+    }
+    # remove defaults from list
+    list <- list[!(names(list) %in% dl)]   
+  }
   
+
+  # check series
+  if (!inherits(x, "ts")){
+    stop("'x' argument is not a time series.")
+  }
+  
+  if (start(x)[1] <= 1000){
+    stop("start year of 'x' must be > 999.")
+  }
+
+
   # na action
   x.na <- na.action(x)
   
@@ -220,7 +261,7 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
   ### construct spclist (spclist fully describes the .spc file)
   spc <- list()
   class(spc) <- c("spclist", "list")
-  
+
   # add data series
   spc$series$title <- paste0("\"", series.name, "\"")
   spc$series$file <- paste0("\"", datafile, "\"")
@@ -232,14 +273,14 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
   spc$regression$aictest <- regression.aictest
   spc$seats$noadmiss <- seats.noadmiss
   
-  spc <- mod_spclist(spc, outlier = outlier, automdl = automdl)
+  spc <- mod_spclist(spc, list = list(outlier = outlier, automdl = automdl))
   
   # add user defined options
-  spc <- mod_spclist(spc, ...)
+  spc <- mod_spclist(spc, list = list)
   
   # remove double entries, adjust outputs
   spc <- consist_spclist(spc)
-  
+
   ### user defined regressors
   if (!is.null(xreg)){
     if (frequency(xreg) != frequency(x)){
@@ -249,10 +290,14 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
     # user names either from input (single "ts"), or from colnames ("mts)
     if (is.null(dim(xreg))){
       user <- deparse(substitute(xreg))
+      # if xreg is a function, usernames should not be taken from the call
+      if (grepl("[\\(\\)]", user)){
+        user <- "user"
+      }
     } else {
-      user <- colnames(xreg)
+      user <- gsub("[\\(\\)]", "", colnames(xreg))
     }
-    
+
     if (!is.null(spc$regression)){
       spc$regression$user <- user
       spc$regression$file <- paste0("\"", xreg.file, "\"")
@@ -263,7 +308,7 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
       spc$x11regression$format <- "\"datevalue\""
     }
   }
-  
+
   if (!is.null(xtrans)){
     if (frequency(xtrans) != frequency(x)){
       stop('xtrans and x must be of the same frequency.')
@@ -272,14 +317,20 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
     # user names either from input (single "ts"), or from colnames ("mts)
     if (is.null(dim(xtrans))){
       name <- deparse(substitute(xtrans))
+      # if xtrans is a function, usernames should not be taken from the call
+      if (grepl("[\\(\\)]", name)){
+        name <- "user"
+      }
     } else {
-      name <- colnames(xtrans)
+      name <- gsub("[\\(\\)]", "", colnames(xtrans))
     }
     spc$transform$name = name
     spc$transform$file <- paste0("\"", xtrans.file, "\"")
     spc$transform$format <- "\"datevalue\""
   }
   
+
+
   ### write spc
   spctxt <- deparse_spclist(spc)
   writeLines(spctxt, con = paste0(iofile, ".spc"))
@@ -297,7 +348,7 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
     file.copy(file.path(wdir, flist), dir, overwrite = TRUE)
     message("All X-13ARIMA-SEATS output files have been copied to '", dir, "'.")
   }
-  
+
   ### Import from X13
   z <- list()  # output object
   
@@ -310,7 +361,7 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
   if (!file.exists(outfile)){
     stop("no output has been generated")
   }
-  
+
   # add all series that have been produced and are specified in SERIES_SUFFIX
   file.suffix <- unlist(lapply(strsplit(flist, "\\."), function(x) x[[2]]))
   is.series <- file.suffix %in% SERIES_SUFFIX
@@ -325,30 +376,29 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
   } else if (!is.null(spc$x11)){
     z$data <- read_data(method = "x11", file = iofile, frequency(x))
   } 
-  
+
   # read errors/warnings
   if (getOption("htmlmode") == 1){
     errtxt <- readLines(paste0(iofile, "_err.html"))
   } else {
     errtxt <- readLines(paste0(iofile, ".err"))
   }
+
+
   z$err <- detect_error(errtxt)
 
-  if (length(z$err$err) > 0){
-    cat("Error while reading the following .spc file:\n\n")
-    print(spc)
-    cat("\n\n\n")
-    print(z$err)
+  if (length(z$err$error) > 0){
     if (is.null(z$data)){
-      stop("no series has been generated")
+      stop(paste(z$err$error, collapse = "; "))
     } else {
-      warning("series has been generated")
+      warning(paste0("Series has been generated, but X-13 returned an error:\n", 
+        paste(strwrap(paste("-", z$err$error), width = 70, exdent = 2), collapse = "\n")
+        ))
     }
   }
   
   # read .udg file
   z$udg <- read_udg(iofile)
-  
   # read .log file
   if (getOption("htmlmode") != 1){
     z$log <-  readLines(paste0(iofile, ".log"), encoding = "UTF-8")
@@ -382,6 +432,9 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
 
   # check if freq detection in read_series has worked
   if (frequency(z$data) != as.numeric(z$udg['freq'])){
+    if (is.null(z$data)){
+      stop("X-13 has run but produced no data")
+    }
     stop("Frequency of imported data (", frequency(z$data), ") is not equal to frequency of detected by X-13 (", as.numeric(z$udg['freq']), ").")
   }
 
@@ -422,7 +475,7 @@ run_x13 <- function(file, out){
     } else {
       x13.bin <- paste0("\"", file.path(env.path, "x13as.exe"), "\"")
     }
-    shell(paste(x13.bin, file, flags), intern = TRUE)
+    msg <- shell(paste(x13.bin, file, flags), intern = TRUE)
   } else {
     if (getOption("htmlmode") == 1){
       # ignore case on unix to avoid problems with different binary names
@@ -431,7 +484,16 @@ run_x13 <- function(file, out){
     } else {
       x13.bin <- file.path(env.path, "x13as")
     }
-    system(paste(x13.bin, file, flags), intern = TRUE, ignore.stderr = TRUE)
+    msg <- system(paste(x13.bin, file, flags), intern = TRUE, ignore.stderr = TRUE)
+
   }
+
+  # error message on non-zero failing
+  if (!is.null(attr(msg, "status"))){
+    if (attr(msg, "status") > 0){
+      stop("X-13 has returned a non-zero exist status, meaning that the current spec file cannot be processed. Errors like this are probably due to a problem in the fortran compilation. In the current compilation for Windows (Version 1.1, Build 9), they occasionally occur with the history and slidingspan spec enabled, in conjunction with SEATS. Try using X-11 or avoiding these specs. Also, the x11regression spec is known to cause occasional problems.")
+    }
+  }
+
 }
 
