@@ -1,6 +1,6 @@
 #' Summary of a X13-ARIMA-SEATS seasonal adjustment
 #' 
-#' Like the corresponding mehtod for \code{"lm"} objects, the method for
+#' Like the corresponding method for \code{"lm"} objects, the method for
 #' \code{"seas"} objects returns the estimated coefficients, its standard errors,
 #' z-statistics and corresponding (two-sided) p-values. Coefficients are returned
 #' both for the exogenous regressors and the coefficients of the ARIMA model.
@@ -140,9 +140,10 @@ print.summary.seas <- function (x, digits = max(3, getOption("digits") - 3),
                       symbols = c("***", "**", "*", ".", " "))
     cat(" Shapiro (normality):", formatC(swtest$statistic, digits = digits), swstars)
   }
-  if (is.null(x$err)){
+  if (!is.null(x$err)){
     cat("\n")
     print(x$err)
   }
+  cat("\n")
   invisible(x)
 }

@@ -30,6 +30,11 @@ The stable version is available from CRAN:
 
     install.packages("seasonal")
 
+To install the latest development version directly from Github, type to the R
+console:
+       
+    install.packages("devtools")       
+    devtools::install_github('christophsax/seasonal')      
 
 #### Getting X-13
 
@@ -122,10 +127,12 @@ easily generated from the automatic model:
     static(m)
     static(m, coef = TRUE)  # also fixes the coefficients
     
-If you have *Shiny* installed, the `inspect` command offers a way to analyze and
-modify a seasonal adjustment procedure (see the section below for details):
+If you have *Shiny* installed, the `inspect` command offers an easy  way to
+analyze and modify a seasonal adjustment procedure (see the section below for
+details):
 
     inspect(m)
+
 
 
 ### Input
@@ -188,8 +195,7 @@ the following priority rules:
     2. `seats` (default)
 
 As an alternative to the `...` argument, spec-arguments can  also be supplied as
-a named list (experimental feature, inspired by base R `save`). This is useful
-for programming:
+a named list. This is useful for programming:
 
     seas(list = list(x = AirPassengers, x11 = ""))
 
@@ -263,25 +269,38 @@ click. Click several times to loop through different outlier types.
     identify(m)
 
 
-### Inspect tool
+### Inspect
 
 The `inspect` function is a graphical tool for choosing a seasonal adjustment
-model, using *[Shiny][shiny]*. To install the latest version of Shiny, type:
+model, using *[Shiny][shiny]*, with the same structure as the demo website of
+seasonal. To install the latest version of Shiny, type:
 
     install.packages("shiny")
 
 The goal of `inspect` is to summarize all relevant options, plots and statistics
-that should be usually considered. `inspect` uses a `"seas"` object as its only
+that should be usually considered. `inspect` uses a `"seas"` object as its main
 argument:
 
     inspect(m)
 
-The `inspect` function opens an interactive window that allows for the
-manipulation of a number of arguments. It offers several views to analyze the
-series graphically. With each change, the adjustment process and the
-visualizations are recalculated. Summary statistics are shown in the first tab.
-The last tab offers access to all series that can be produced with X-13. The
-views in `inspect` are also customizable, see the examples in `?inspect`.
+Frequently used options can be modified using the drop down selectors in the
+upper left panel. Each change will result in a re-estimation of the seasonal
+adjustment model. The R-call, the output and the summary are updated
+accordingly.
+
+Alternatively, the R-Call can be modified manually in the lower left panel.
+Press 'Run Call' to re-estimate the model and to adjust the option selectors,
+the output, and the summary. With the 'Close and Import' button, inspect is 
+closed and the call is imported to R. The 'static' button substitutes 
+automatic procedures are substituted by the automatically chosen 
+spec-argument options, in the same way as `static`.
+
+The views in the upper right panel can be selected from the drop down menu. The
+views can also be customized (see `?inspect`for details)
+
+The lower right panel shows the summary, as descibed in the help page of
+`?summary.seas`. The 'Full X-13 output' button opens the complete 
+output of X-13 in a separate tab or window.
 
 
 ### Chinese New Year, Indian Diwali and other customized holidays

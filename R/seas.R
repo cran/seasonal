@@ -59,7 +59,6 @@
 #'   details).
 #' @param list  a named list with additional spec-arguments options. This is an
 #'   alternative to the \code{...} argument. It is useful for programming.
-#'   (experimental)
 #'
 #' @return returns an object of class \code{"seas"}, essentially a list with the
 #'   following elements: 
@@ -100,8 +99,7 @@
 #' @references Vignette with a more detailed description: 
 #'   \url{http://cran.r-project.org/web/packages/seasonal/vignettes/seas.pdf}
 #'   
-#'   Wiki page with a comprehensive list of R examples from the X-13ARIMA-SEATS 
-#'   manual: 
+#'   Comprehensive list of R examples from the X-13ARIMA-SEATS manual: 
 #'   \url{https://github.com/christophsax/seasonal/wiki/Examples-of-X-13ARIMA-SEATS-in-R}
 #'   
 #'   
@@ -115,8 +113,8 @@
 #' summary(m)
 #' 
 #' # invoke X-13ARIMA-SEATS options as 'spec.argument' through the ... argument
-#' # (consult the X-13ARIMA-SEATS manual for many more options and the wiki for
-#' # for more examples)
+#' # (consult the X-13ARIMA-SEATS manual for many more options and the list of
+#' # R examples for more examples)
 #' seas(AirPassengers, regression.aictest = c("td"))  # no easter testing
 #' seas(AirPassengers, force.type = "denton")  # force equality of annual values
 #' seas(AirPassengers, x11 = "")  # use x11, overrides the 'seats' spec
@@ -289,15 +287,14 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
     write_ts_dat(na.action(xreg), file = xreg.file)
     # user names either from input (single "ts"), or from colnames ("mts)
     if (is.null(dim(xreg))){
-      user <- deparse(substitute(xreg))
-      # if xreg is a function, usernames should not be taken from the call
-      if (grepl("[\\(\\)]", user)){
+      if (inherits(substitute(xreg), "name")){
+        user <- deparse(substitute(xreg))
+      } else {
         user <- "user"
       }
     } else {
       user <- gsub("[\\(\\)]", "", colnames(xreg))
     }
-
     if (!is.null(spc$regression)){
       spc$regression$user <- user
       spc$regression$file <- paste0("\"", xreg.file, "\"")
@@ -316,9 +313,9 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
     write_ts_dat(na.action(xtrans), file = xtrans.file)
     # user names either from input (single "ts"), or from colnames ("mts)
     if (is.null(dim(xtrans))){
-      name <- deparse(substitute(xtrans))
-      # if xtrans is a function, usernames should not be taken from the call
-      if (grepl("[\\(\\)]", name)){
+      if (inherits(substitute(xtrans), "name")){
+        name <- deparse(substitute(xtrans))
+      } else {
         name <- "user"
       }
     } else {
@@ -451,6 +448,12 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
   z$spc <- spc
   z$call <- match.call()
   z$wdir <- wdir
+
+  # clean up
+  if (!out){
+      file.remove(list.files(wdir, full.names = TRUE))
+  }
+
   class(z) <- "seas"
   z
 }
@@ -488,10 +491,24 @@ run_x13 <- function(file, out){
 
   }
 
+  # error message if output contains the ERROR
+  if (inherits(msg, "character")){
+    le0 <- grep("ERROR", msg)
+    if (length(le0) > 0){
+      le1 <- grep("Program error", msg)
+      if (length(le1) > 0){
+         x13err <- paste(msg[le0:(le1-1)], collapse = "\n")
+      } else {
+         paste(msg[le0], collapse = "\n")
+      }
+      stop("X-13 has returned an Error, with the following message(s):\n\n", x13err, call. = FALSE)
+    }
+  }
+
   # error message on non-zero failing
   if (!is.null(attr(msg, "status"))){
     if (attr(msg, "status") > 0){
-      stop("X-13 has returned a non-zero exist status, meaning that the current spec file cannot be processed. Errors like this are probably due to a problem in the fortran compilation. In the current compilation for Windows (Version 1.1, Build 9), they occasionally occur with the history and slidingspan spec enabled, in conjunction with SEATS. Try using X-11 or avoiding these specs. Also, the x11regression spec is known to cause occasional problems.")
+      stop("X-13 has returned a non-zero exist status, which means that the current spec file cannot be processed for an unknown reason.", call. = FALSE)
     }
   }
 

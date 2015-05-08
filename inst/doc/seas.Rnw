@@ -11,7 +11,6 @@
 
 
 
-
 \begin{document}
 
 
@@ -19,7 +18,6 @@
 \title{\textbf{seasonal}: R interface to X-13ARIMA-SEATS}
 
 \author{Christoph Sax}
-
 
 \date{\today}
 \maketitle

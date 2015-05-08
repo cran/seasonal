@@ -33,8 +33,7 @@
 #' @references Vignette with a more detailed description: 
 #'   \url{http://cran.r-project.org/web/packages/seasonal/vignettes/seas.pdf}
 #'   
-#'   Wiki page with a comprehensive list of R examples from the X-13ARIMA-SEATS 
-#'   manual: 
+#'   Comprehensive list of R examples from the X-13ARIMA-SEATS manual: 
 #'   \url{https://github.com/christophsax/seasonal/wiki/Examples-of-X-13ARIMA-SEATS-in-R}
 #'   
 #'   Official X-13ARIMA-SEATS manual: 
@@ -61,11 +60,11 @@
 #' 
 #' # accessing the .out file (see ?out)
 #' out(m)
-#' out(m, search = "Ljung-Box")
 #' }
 #' @export
 qs <- function(x){
-  z0 <- x$udg[grepl("^qs", names(x$udg))]
+  qs.var <- c("qsori", "qsorievadj", "qsrsd", "qssadj", "qssadjevadj", "qsirr",  "qsirrevadj", "qssori", "qssorievadj", "qssrsd", "qsssadj", "qsssadjevadj",  "qssirr", "qssirrevadj")
+  z0 <- x$udg[names(x$udg) %in% qs.var]
   z <- read.table(text = z0, colClasses = "numeric")
   rownames(z) <- names(z0)
   colnames(z) <- c("qs", "p-val")

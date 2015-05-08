@@ -9,8 +9,8 @@
 #' \code{residplot} plots the residuals and the outliers.
 #' 
 #' \code{monthplot} calls the monthplot method for class \code{"seas"}. It plot 
-#' the seasonal and SI component periodwise. Like the default method `monthplot`
-#' can be used for all frequencies.
+#' the seasonal and SI component periodwise. Despite its name, \code{monthplot}
+#' can be used for series of all frequencies.
 #' 
 #' @param x  an object of class \code{"seas"}, usually, a result of a call to 
 #'   \code{\link{seas}}.
@@ -19,8 +19,7 @@
 #' @param choice     character string, \code{"seasonal"} (default) or 
 #'   \code{"irregular"}.
 #' @param main    character string, title of the graph.
-#' @param series  X-13 name of the series to plot, see the manual for a
-#'   description.
+#' @param transform   character string, optionally transform the data to period to period  \code{"PC"} or year to year\code{"PCY"} percentage change rates. 
 #' @param \dots   further arguments passed to the plotting functions.
 #'   
 #' @return All plot functions return a plot as their side effect.
@@ -31,8 +30,7 @@
 #' @references Vignette with a more detailed description: 
 #'   \url{http://cran.r-project.org/web/packages/seasonal/vignettes/seas.pdf}
 #'   
-#'   Wiki page with a comprehensive list of R examples from the X-13ARIMA-SEATS 
-#'   manual: 
+#'   Comprehensive list of R examples from the X-13ARIMA-SEATS manual: 
 #'   \url{https://github.com/christophsax/seasonal/wiki/Examples-of-X-13ARIMA-SEATS-in-R}
 #'   
 #'   
@@ -64,16 +62,42 @@
 #' qqnorm(resid(m))
 #' }
 plot.seas <- function(x, outliers = TRUE, trend = FALSE, 
-                      main = "unadjusted and seasonally adjusted series", ...){
+                      main = "Original and Adjusted Series", 
+                      transform = c("none", "PC", "PCY"), ...){
 
-  ts.plot(cbind(original(x), final(x)), 
+  transform <- match.arg(transform)
+
+  orignalx <- original(x)
+  finalx <- final(x)
+
+  if (transform == "PC"){
+    orignalx <- (lag(orignalx, -1) - orignalx) / lag(orignalx, -1)
+    finalx <- (lag(finalx, -1) - finalx) / lag(finalx, -1)
+    if (main != ""){
+      main <- paste(main, "(PC)")
+    }
+  }
+  if (transform == "PCY"){
+    fr <- frequency(orignalx)
+    orignalx <- (lag(orignalx, -fr) - orignalx) / lag(orignalx, -fr)
+    finalx <- (lag(finalx, -fr) - finalx) / lag(finalx, -fr)
+    if (main != ""){
+      main <- paste(main, "(PCY)")
+    }
+  }
+
+
+  ts.plot(cbind(orignalx, finalx),
           col = c("black", "red"), 
           lwd = c(1, 2),
           main = main, ...
   )
   
   if (identical(trend, TRUE)){
-    lines(x$data[, 'trend'], col = "blue", lty = "dashed")
+    trendx <- x$data[, 'trend']
+    if (transform == "PC") trendx <- (lag(trendx, -1) - trendx) / lag(trendx, -1)
+    if (transform == "PCY") trendx <- (lag(trendx, -fr) - trendx) / lag(trendx, -fr)
+    lines(trendx, col = "blue", lty = "dashed")
   }
   
   if (identical(outliers, TRUE)){
@@ -87,9 +111,9 @@ plot.seas <- function(x, outliers = TRUE, trend = FALSE,
 
 #' @rdname plot.seas
 #' @export
-residplot <- function(x, outliers = TRUE, ...){
+residplot <- function(x, outliers = TRUE, main = "residuals of regARIMA", ...){
   ts.plot(resid(x), ylab = "value",
-          main = "residuals of regARIMA", ...
+          main = main, ...
   )
   
   if (identical(outliers, TRUE)){
@@ -109,11 +133,11 @@ residplot <- function(x, outliers = TRUE, ...){
 monthplot.seas <- function(x, choice = c("seasonal", "irregular"), ...){
   choice <- match.arg(choice)
   if (choice == "seasonal"){
-    monthplot(x$data[,'seasonal'], ylab = "", lwd = 2, col = "red", main = "seasonal component, SI ratio", ...)
+    monthplot(x$data[,'seasonal'], ylab = "", lwd = 2, col = "red", main = "Seasonal Component, SI Ratio", ...)
     monthplot(siratio(x), col = "blue", type = "h", add = TRUE)
   }
   if (choice == "irregular"){
-    monthplot(x$data[,'irregular'], ylab = "", main = "irregular component")
+    monthplot(x$data[,'irregular'], ylab = "", main = "Irregular Component")
   }
 }
 
