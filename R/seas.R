@@ -32,7 +32,8 @@
 #' @param seats.noadmiss   spec 'seats' with argument \code{noadmiss = "yes"} 
 #'   (default). Seasonal adjustment by SEATS, if SEATS decomposition is invalid,
 #'   an alternative model is used (a message is returned). If \code{noadmiss =
-#'   "no"}, no approximation is done.
+#'   "no"}, no approximation is done. If the seats spec is removed 
+#'   (\code{seats = NULL}), no seasonal adjustment is performed.
 #' @param transform.function   spec \code{transform} with argument 
 #'   \code{function = "auto"} (default). Automatic log transformation detection.
 #'   Set equal to \code{"none"}, \code{"log"} or any value that is allowed by 
@@ -106,6 +107,10 @@
 #'   Official X-13ARIMA-SEATS manual: 
 #'   \url{http://www.census.gov/ts/x13as/docX13AS.pdf}
 #' @export
+#' @import datasets
+#' @import grDevices
+#' @import graphics
+#' @import utils
 #' 
 #' @examples
 #' \dontrun{
@@ -119,10 +124,15 @@
 #' seas(AirPassengers, force.type = "denton")  # force equality of annual values
 #' seas(AirPassengers, x11 = "")  # use x11, overrides the 'seats' spec
 #'
-#' # 'spec.argument' combinations can also be supplied as a named list
-#' # (useful for programming)
-#' seas(AirPassengers, list = list(regression.aictest = c("td")))
-#' seas(list = list(x = AirPassengers, force.type = "denton"))
+#' # 'spec.argument' combinations can also be supplied as a named list, which is
+#' # useful for programming
+#' seas(AirPassengers, list = list(regression.aictest = c("td"), outlier = NULL))
+#' # constructing the list step by step
+#' ll <- list()
+#' ll[["x"]] <- AirPassengers
+#' ll[["regression.aictest"]] <- "td"
+#' ll["outlier"] <- list(NULL)  # assigning NULL to a list using single brackets
+#' seas(list = ll)
 #'
 #' # options can be entered as vectors
 #' seas(AirPassengers, regression.variables = c("td1coef", "easter[1]"))
@@ -162,6 +172,10 @@
 #' # identical to a X-13ARIMA-SEATS specification of the the level shift
 #' seas(AirPassengers, regression.variables = c("tl1955.01-1957.12"), 
 #'      outlier = NULL)
+#' 
+#' # forecasting an annual series without seasonal adjustment
+#' m <- seas(airmiles, seats = NULL, regression.aictest = NULL)
+#' series(m, "forecast.forecasts")
 #' 
 #' # NA handling
 #' AirPassengersNA <- window(AirPassengers, end = 1962, extend = TRUE)
@@ -240,11 +254,13 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
   x.na <- na.action(x)
   
   # temporary working dir and filenames
-  wdir <- file.path(tempdir(), "x13")
-  if (!file.exists(wdir)){
-    dir.create(wdir)
+  pat <- if (out) "x13out" else "x13"
+  wdir <- tempfile(pattern = pat)
+  while (file.exists(wdir)) {
+    wdir <- tempfile(pattern = pat)
   }
-  file.remove(list.files(wdir, full.names = TRUE))
+
+  dir.create(wdir)
   
   # file names for 
   iofile <- file.path(wdir, "iofile")      # inputs and outputs (w/o suffix)
@@ -290,10 +306,11 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
       if (inherits(substitute(xreg), "name")){
         user <- deparse(substitute(xreg))
       } else {
-        user <- "user"
+        user <- "xreg"
       }
     } else {
-      user <- gsub("[\\(\\)]", "", colnames(xreg))
+      user <- paste0("xreg", 1:NCOL(xreg))
+      # user <- gsub("[\\(\\)]", "", colnames(xreg))
     }
     if (!is.null(spc$regression)){
       spc$regression$user <- user
@@ -316,10 +333,11 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
       if (inherits(substitute(xtrans), "name")){
         name <- deparse(substitute(xtrans))
       } else {
-        name <- "user"
+        name <- "xtrans"
       }
     } else {
-      name <- gsub("[\\(\\)]", "", colnames(xtrans))
+      name <- paste0("xtrans", 1:NCOL(xtrans))
+      # name <- gsub("[\\(\\)]", "", colnames(xtrans))
     }
     spc$transform$name = name
     spc$transform$file <- paste0("\"", xtrans.file, "\"")
@@ -331,7 +349,7 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
   ### write spc
   spctxt <- deparse_spclist(spc)
   writeLines(spctxt, con = paste0(iofile, ".spc"))
-  
+
   ### Run X13, either with full output or not
   run_x13(iofile, out)
   
@@ -362,6 +380,7 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
   # add all series that have been produced and are specified in SERIES_SUFFIX
   file.suffix <- unlist(lapply(strsplit(flist, "\\."), function(x) x[[2]]))
   is.series <- file.suffix %in% SERIES_SUFFIX
+
   series.list <- lapply(file.path(wdir, flist[is.series]), read_series, 
                         frequency = frequency(x))
   names(series.list) <- file.suffix[is.series]
@@ -372,35 +391,33 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
     z$data <- read_data(method = "seats", file = iofile, frequency(x))
   } else if (!is.null(spc$x11)){
     z$data <- read_data(method = "x11", file = iofile, frequency(x))
-  } 
-
-  # read errors/warnings
-  if (getOption("htmlmode") == 1){
-    errtxt <- readLines(paste0(iofile, "_err.html"))
   } else {
-    errtxt <- readLines(paste0(iofile, ".err"))
+    z$data <- NULL
   }
 
-
-  z$err <- detect_error(errtxt)
-
-  if (length(z$err$error) > 0){
-    if (is.null(z$data)){
-      stop(paste(z$err$error, collapse = "; "))
-    } else {
-      warning(paste0("Series has been generated, but X-13 returned an error:\n", 
-        paste(strwrap(paste("-", z$err$error), width = 70, exdent = 2), collapse = "\n")
-        ))
-    }
+  # errors/warnings
+  z$err <- read_err(iofile)
+  
+  if (is.null(z$data)){
+    drop_x13messages(z$err)
+  } else {
+    drop_x13messages(z$err, "Series has been generated, but X-13 returned an error\n\n", msgfun = warnings)
   }
   
+  if (is.null(z$data) && any(c("x11", "seats") %in% names(spc))){
+    drop_x13messages(z$err, msg = "X-13 has run but produced no data\n\n", ontype = "all")
+  }
+
+
   # read .udg file
   z$udg <- read_udg(iofile)
+
   # read .log file
   if (getOption("htmlmode") != 1){
     z$log <-  readLines(paste0(iofile, ".log"), encoding = "UTF-8")
   }
   
+  # browser()
   # read .est file
   z$est <- read_est(iofile)
 
@@ -408,9 +425,10 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
   z$lks <- read_lks(iofile)
 
   # read .mdl file
-  z$model <- try(read_mdl(iofile), silent = TRUE) 
+  z$model <- try(parse_spc(readLines(paste0(iofile, ".mdl"))), silent = TRUE) 
+
   # fails for very complicated models, but is needed only for static()
-  if (inherits(z$mdl, "try-error")){
+  if (inherits(z$model, "try-error")){
     z$model <- NULL
   }
 
@@ -427,13 +445,24 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
     message(paste("Model used in SEATS is different:", z$udg['seatsmdl']))
   }
 
+
+
   # check if freq detection in read_series has worked
-  if (frequency(z$data) != as.numeric(z$udg['freq'])){
-    if (is.null(z$data)){
-      stop("X-13 has run but produced no data")
-    }
-    stop("Frequency of imported data (", frequency(z$data), ") is not equal to frequency of detected by X-13 (", as.numeric(z$udg['freq']), ").")
+  if (!is.null(z$data)){
+    ff <- frequency(z$data)
+  } else if (length(series.list) > 0){
+    ff <- unique(sapply(series.list[sapply(series.list, is.ts)], frequency))
+  } else {
+    ff <- NULL
   }
+
+  if (!is.null(ff)){
+    if (!as.numeric(z$udg['freq']) %in% ff){
+      msg <- paste0("Frequency of imported data (", frequency(z$data), ") is not equal to frequency of detected by X-13 (", as.numeric(z$udg['freq']), "). X-13 retured the addital messages: \n\n")
+      drop_x13messages(z$err, msg = msg, ontype = "all")
+    }
+  }
+
 
   ### final additions to output
   if (!is.null(attr(x.na, "na.action"))){
@@ -451,7 +480,7 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
 
   # clean up
   if (!out){
-      file.remove(list.files(wdir, full.names = TRUE))
+    unlink(wdir, recursive = TRUE)
   }
 
   class(z) <- "seas"
@@ -490,18 +519,20 @@ run_x13 <- function(file, out){
     msg <- system(paste(x13.bin, file, flags), intern = TRUE, ignore.stderr = TRUE)
 
   }
-
-  # error message if output contains the ERROR
+  # error message if output contains the word ERROR
   if (inherits(msg, "character")){
-    le0 <- grep("ERROR", msg)
-    if (length(le0) > 0){
-      le1 <- grep("Program error", msg)
-      if (length(le1) > 0){
-         x13err <- paste(msg[le0:(le1-1)], collapse = "\n")
-      } else {
-         paste(msg[le0], collapse = "\n")
+    if (any(grepl("ERROR", msg))){
+      if (file.exists(paste0(file, ".err"))){
+        if (any(grepl("iofile_err", msg))){
+          # read from separate file
+          err <- read_err(file)
+          drop_x13messages(err)
+        } else {
+          # fall back: parse message
+          err <- detect_error(msg, htmlmode = 0)
+          drop_x13messages(err)
+        }
       }
-      stop("X-13 has returned an Error, with the following message(s):\n\n", x13err, call. = FALSE)
     }
   }
 
@@ -513,4 +544,5 @@ run_x13 <- function(file, out){
   }
 
 }
+
 

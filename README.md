@@ -1,11 +1,15 @@
 R interface to X-13ARIMA-SEATS
 ------------------------------
 
+[![Build Status](https://travis-ci.org/christophsax/seasonal.svg?branch=master)](https://travis-ci.org/christophsax/seasonal)
+
 *seasonal* is an easy-to-use and full-featured R-interface to X-13ARIMA-SEATS,
 the newest seasonal adjustment software developed by the [United States Census
 Bureau][census]. X-13ARIMA-SEATS combines and extends the capabilities of the
 older X-12ARIMA (developed by the Census Bureau) and TRAMO-SEATS (developed by
 the Bank of Spain).
+
+![Graphical user interface for X-13](https://github.com/christophsax/seasonal/blob/master/vignettes/images/inspect.jpg)
 
 If you are new to seasonal adjustment or X-13ARIMA-SEATS, the automated
 procedures of *seasonal* allow you to quickly produce good seasonal adjustments
@@ -20,6 +24,13 @@ by X-13ARIMA-SEATS. The only exception is the 'composite' spec, which is easy to
 replicate in basic R. Read the [Input](#input) and [Output](#output) sections
 and have a look at the [wiki][examples], where the examples from the official
 X-13ARIMA-SEATS [manual][manual] are reproduced in R.
+
+*seasonal* includes a [graphical user interface](#inspect) that facitlitates the
+use of X-13 both for beginners and advanced users. The final sections of this
+vignette cover additional topics: [User defined holidays](#chinese-new- year-
+indian-diwali-in-other-customized-holidays), such as Chinese New Year, the [use
+of seasonal for production](#production-use), and the [import of existing X-13
+model specs](#import-x-13-models-and-series) to R.
 
 
 ### Installation
@@ -43,8 +54,8 @@ be obtained precompiled from [here][census_win] (Windows: `x13ashtmlall.zip`).
 There are guides for building it from source for [Ubuntu][ubuntu] or [Mac
 OS-X][os-x].
 
-Download the file, unzip it and copy `x13ashtml.exe` (or `x13ashtml`, on a Unix
-system) to any desired location on your file system. 
+Download the file, unzip it and copy `x13ashtml.exe` (or `x13ashtml`, on Linux
+or OS-X) to any desired location on your file system.
 
 #### Telling R where to find X-13
 
@@ -247,7 +258,6 @@ outliers. Optionally, it also draws the trend of the seasonal decomposition:
 
     m <- seas(AirPassengers, regression.aictest = c("td", "easter"))
     plot(m)
-    plot(m, outliers = FALSE)
     plot(m, trend = TRUE)
 
 The `monthplot` function allows for a monthwise plot (or quarterwise, with the
@@ -292,11 +302,11 @@ Alternatively, the R-Call can be modified manually in the lower left panel.
 Press 'Run Call' to re-estimate the model and to adjust the option selectors,
 the output, and the summary. With the 'Close and Import' button, inspect is 
 closed and the call is imported to R. The 'static' button substitutes 
-automatic procedures are substituted by the automatically chosen 
+automatic procedures by the automatically chosen 
 spec-argument options, in the same way as `static`.
 
 The views in the upper right panel can be selected from the drop down menu. The
-views can also be customized (see `?inspect`for details)
+views can also be customized (see `?inspect` for details)
 
 The lower right panel shows the summary, as descibed in the help page of
 `?summary.seas`. The 'Full X-13 output' button opens the complete 
@@ -313,8 +323,9 @@ specifies the occurrence of the holiday.
 
 In order to adjust Indian industrial production for Diwali effects, use, e.g.,:
 
-    data(seasonal) # Indian industrial production: iip
-    data(holiday)  # dates of Chinese New Year, Indian Diwali and Easter
+    # variables included in seasonal
+    # iip: Indian industrial production
+    # cny, diwali, easter: dates of Chinese New Year, Indian Diwali and Easter
     
     seas(iip, 
     x11 = "",
@@ -395,12 +406,14 @@ different automated routine.
 
 
 If you have several cores and want to speed things up, the process is well
-suited for parallelization (thanks, Matthias Bannert):
+suited for parallelization:
 
     # a list with 100 time series
     largedta <- rep(list(AirPassengers), 100)
 
-    library(parallel)  # R-core team, part of R 
+    library(parallel)  # this is part of a standard R installation
+
+ If you are on Windows or want to use cluster parallelization, use `parLapply`:
 
     # set up cluster
     cl <- makeCluster(detectCores())
@@ -411,24 +424,48 @@ suited for parallelization (thanks, Matthias Bannert):
     # export data to each node
     clusterExport(cl, varlist = "largedta")
 
-    # run in parallel (2.2s on a 8-core Macbook)
+    # run in parallel (2.2s on a 8-core Macbook, vs 9.6s with standard lapply)
     parLapply(cl, largedta, function(e) try(seas(e, x11 = "")))
-
-    # compare to standard lapply (9.6s)
-    lapply(largedta, function(e) try(seas(e, x11 = "")))
 
     # finally, stop the cluster
     stopCluster(cl)
 
+On Linux or OS-X, 'forking' parallelization allows you to do the same in a
+single line:
 
-### License
+    mclapply(cl, largedta, function(e) try(seas(e, x11 = "")))
 
-*seasonal* is free and open source, licensed under GPL-3. It has been developed 
-for the use at the Swiss State Secretariat of Economic Affairs and is not
-related to the development of X-13ARIMA-SEATS ([license][license]).
+
+### Import X-13 models and series
+
+Two experimental utility functions allow you to import `.spc` files and X-13
+data files from any X-13 set-up. Simply locate the path of your X-13 `.spc`
+file, and the `import.spc` function will construct the corresponding call to
+`seas` as well as the calls for importing the data.
+
+    # importing the orginal X-13 example file
+    import.spc(file.path(path.package("seasonal"), "tests", "Testairline.spc"))
+
+If data is stored outside the `.spc` file (as it usually will be), the
+calls will make use of the `import.ts` function, which imports arbitrary X-13
+data files as R time series. See `?import.ts` for examples.
+
+
+### License and Credits
+
+*seasonal* is free and open source, licensed under GPL-3. It requires the X
+-13ARIMA-SEATS software by the U.S. Census Bureau, which is open source and
+freely available under the terms of its own [license][license].
+
+*seasonal* has been originally developed for the use at the Swiss State
+Secretariat of Economic Affairs. It has been greatly improved over time thanks
+to suggestions and support from Matthias Bannert, Freya Beamish, Vidur Dhanda,
+Alain Galli, Ronald Indergand, Preetha Kalambaden, Stefan Leist, James Livsey,
+Brian Monsell, Pinaki Mukherjee, Bruno Parnisari, and many others.
 
 Please report bugs and suggestions on [Github][github] or send me an 
 [e-mail](mailto:christoph.sax@gmail.com). Thank you!
+
 
 [manual]: http://www.census.gov/ts/x13as/docX13ASHTML.pdf "Reference Manual"
 
@@ -446,6 +483,6 @@ Please report bugs and suggestions on [Github][github] or send me an
 
 [shiny]: http://shiny.rstudio.com
 
-[ubuntu]: http://askubuntu.com/questions/444354/how-do-i-install-x13-arima-seats-for-rstudio-from-source "Unix Installation Notes"
+[ubuntu]: https://github.com/christophsax/seasonal/wiki/Compiling-X-13ARIMA-SEATS-from-Source-for-Ubuntu "Linux Installation Notes"
 
 [os-x]: https://github.com/christophsax/seasonal/wiki/Compiling-X-13ARIMA-SEATS-from-Source-for-OS-X "OS-X Installation Notes"

@@ -31,6 +31,15 @@ where the examples from the official X-13ARIMA-SEATS
 \href{http://www.census.gov/ts/x13as/docX13ASHTML.pdf}{manual} are
 reproduced in R.
 
+\emph{seasonal} includes a \hyperref[inspect]{graphical user interface}
+that facitlitates the use of X-13 both for beginners and advanced users.
+The final sections of this vignette cover additional topics:
+\hyperref[chinese-new-ux5cux2520year-ux5cux2520indian-diwali-in-other-customized-holidays]{User
+defined holidays}, such as Chinese New Year, the
+\hyperref[production-use]{use of seasonal for production}, and the
+\hyperref[import-x-13-models-and-series]{import of existing X-13 model
+specs} to R.
+
 \hyperdef{}{installation}{\section{Installation}\label{installation}}
 
 \subsection{Getting seasonal}\label{getting-seasonal}
@@ -56,13 +65,13 @@ X-13ARIMA-SEATS. They can be obtained precompiled from
 \href{http://www.census.gov/srd/www/x13as/x13down_pc.html}{here}
 (Windows: \texttt{x13ashtmlall.zip}). There are guides for building it
 from source for
-\href{http://askubuntu.com/questions/444354/how-do-i-install-x13-arima-seats-for-rstudio-from-source}{Ubuntu}
+\href{https://github.com/christophsax/seasonal/wiki/Compiling-X-13ARIMA-SEATS-from-Source-for-Ubuntu}{Ubuntu}
 or
 \href{https://github.com/christophsax/seasonal/wiki/Compiling-X-13ARIMA-SEATS-from-Source-for-OS-X}{Mac
 OS-X}.
 
 Download the file, unzip it and copy \texttt{x13ashtml.exe} (or
-\texttt{x13ashtml}, on a Unix system) to any desired location on your
+\texttt{x13ashtml}, on Linux or OS-X) to any desired location on your
 file system.
 
 \subsection{Telling R where to find
@@ -206,10 +215,10 @@ Note that R vectors may be used as an input. If a spec is added without
 any arguments, the spec should be set equal to an empty string (or,
 alternatively, to an empty list, as in previous versions). Several
 defaults of \texttt{seas} are empty strings, such as the default
-\texttt{seats = ""}. See the help page (\texttt{?seas}) for more details
-on the defaults. Note the difference between \texttt{""} (meaning the
-spec is enabled but has no arguments) and \texttt{NULL} (meaning the
-spec is disabled).
+\texttt{seats\ =\ ""}. See the help page (\texttt{?seas}) for more
+details on the defaults. Note the difference between \texttt{""}
+(meaning the spec is enabled but has no arguments) and \texttt{NULL}
+(meaning the spec is disabled).
 
 It is possible to manipulate almost all inputs to X-13ARIMA-SEATS in
 this way. The best way to learn about the relationship between the
@@ -296,7 +305,7 @@ m <- seas(AirPassengers)
 series(m, "forecast.forecasts")
 \end{verbatim}
 
-Because the \texttt{forecast.save = "forecasts"} argument has not been
+Because the \texttt{forecast.save\ =\ "forecasts"} argument has not been
 specified in the model call, \texttt{series} re-evaluates the call with
 the `forecast' spec enabled. It is also possible to return more than one
 output table at the same time:
@@ -347,7 +356,6 @@ seasonal decomposition:
 \begin{verbatim}
 m <- seas(AirPassengers, regression.aictest = c("td", "easter"))
 plot(m)
-plot(m, outliers = FALSE)
 plot(m, trend = TRUE)
 \end{verbatim}
 
@@ -378,13 +386,13 @@ outlier types.
 identify(m)
 \end{verbatim}
 
-\section{Inspect}\label{inspect}
+\hyperdef{}{inspect}{\section{Inspect}\label{inspect}}
 
 The \texttt{inspect} function is a graphical tool for choosing a
 seasonal adjustment model, using
 \emph{\href{http://shiny.rstudio.com}{Shiny}}, with the same structure
-as the \href{http://www.seasonal.website}{demo website of seasonal}. To
-install the latest version of Shiny, type:
+as the demo website of seasonal. To install the latest version of Shiny,
+type:
 
 \begin{verbatim}
 install.packages("shiny")
@@ -407,12 +415,11 @@ Alternatively, the R-Call can be modified manually in the lower left
 panel. Press `Run Call' to re-estimate the model and to adjust the
 option selectors, the output, and the summary. With the `Close and
 Import' button, inspect is closed and the call is imported to R. The
-`static' button substitutes automatic procedures are substituted by the
-automatically chosen spec-argument options, in the same way as
-\texttt{static}.
+`static' button substitutes automatic procedures by the automatically
+chosen spec-argument options, in the same way as \texttt{static}.
 
 The views in the upper right panel can be selected from the drop down
-menu. The views can also be customized (see \texttt{?inspect}for
+menu. The views can also be customized (see \texttt{?inspect} for
 details)
 
 The lower right panel shows the summary, as descibed in the help page of
@@ -433,8 +440,9 @@ In order to adjust Indian industrial production for Diwali effects, use,
 e.g.,:
 
 \begin{verbatim}
-data(seasonal) # Indian industrial production: iip
-data(holiday)  # dates of Chinese New Year, Indian Diwali and Easter
+# variables included in seasonal
+# iip: Indian industrial production
+# cny, diwali, easter: dates of Chinese New Year, Indian Diwali and Easter
 
 seas(iip, 
 x11 = "",
@@ -446,7 +454,8 @@ regression.usertype = "holiday"
 For more examples, including Chinese New Year and complex pre- and
 post-holiday adjustments, see \texttt{?genhol}.
 
-\section{Production use}\label{production-use}
+\hyperdef{}{production-use}{\section{Production
+use}\label{production-use}}
 
 While \emph{seasonal} offers a quick way to adjust a time series in R,
 it is equally suited for the recurring processing of potentially large
@@ -530,14 +539,19 @@ do.call(cbind, lapply(ll[!is.err], final))
 \end{verbatim}
 
 If you have several cores and want to speed things up, the process is
-well suited for parallelization (thanks, Matthias Bannert):
+well suited for parallelization:
 
 \begin{verbatim}
 # a list with 100 time series
 largedta <- rep(list(AirPassengers), 100)
 
-library(parallel)  # R-core team, part of R 
+library(parallel)  # this is part of a standard R installation
+\end{verbatim}
 
+If you are on Windows or want to use cluster parallelization, use
+\texttt{parLapply}:
+
+\begin{verbatim}
 # set up cluster
 cl <- makeCluster(detectCores())
 
@@ -547,22 +561,52 @@ clusterEvalQ(cl, library(seasonal))
 # export data to each node
 clusterExport(cl, varlist = "largedta")
 
-# run in parallel (2.2s on a 8-core Macbook)
+# run in parallel (2.2s on a 8-core Macbook, vs 9.6s with standard lapply)
 parLapply(cl, largedta, function(e) try(seas(e, x11 = "")))
-
-# compare to standard lapply (9.6s)
-lapply(largedta, function(e) try(seas(e, x11 = "")))
 
 # finally, stop the cluster
 stopCluster(cl)
 \end{verbatim}
 
-\section{License}\label{license}
+On Linux or OS-X, `forking' parallelization allows you to do the same in
+a single line:
 
-\emph{seasonal} is free and open source, licensed under GPL-3. It has
-been developed for the use at the Swiss State Secretariat of Economic
-Affairs and is not related to the development of X-13ARIMA-SEATS
-(\href{https://www.census.gov/srd/www/disclaimer.html}{license}).
+\begin{verbatim}
+mclapply(cl, largedta, function(e) try(seas(e, x11 = "")))
+\end{verbatim}
+
+\hyperdef{}{import-x-13-models-and-series}{\section{Import X-13 models
+and series}\label{import-x-13-models-and-series}}
+
+Two experimental utility functions allow you to import \texttt{.spc}
+files and X-13 data files from any X-13 set-up. Simply locate the path
+of your X-13 \texttt{.spc} file, and the \texttt{import.spc} function
+will construct the corresponding call to \texttt{seas} as well as the
+calls for importing the data.
+
+\begin{verbatim}
+# importing the orginal X-13 example file
+import.spc(file.path(path.package("seasonal"), "tests", "Testairline.spc"))
+\end{verbatim}
+
+If data is stored outside the \texttt{.spc} file (as it usually will
+be), the calls will make use of the \texttt{import.ts} function, which
+imports arbitrary X-13 data files as R time series. See
+\texttt{?import.ts} for examples.
+
+\section{License and Credits}\label{license-and-credits}
+
+\emph{seasonal} is free and open source, licensed under GPL-3. It
+requires the X -13ARIMA-SEATS software by the U.S. Census Bureau, which
+is open source and freely available under the terms of its own
+\href{https://www.census.gov/srd/www/disclaimer.html}{license}.
+
+\emph{seasonal} has been originally developed for the use at the Swiss
+State Secretariat of Economic Affairs. It has been greatly improved over
+time thanks to suggestions and support from Matthias Bannert, Freya
+Beamish, Vidur Dhanda, Alain Galli, Ronald Indergand, Preetha
+Kalambaden, Stefan Leist, James Livsey, Brian Monsell, Pinaki Mukherjee,
+Bruno Parnisari, and many others.
 
 Please report bugs and suggestions on
 \href{https://github.com/christophsax/seasonal}{Github} or send me an
