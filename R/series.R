@@ -215,10 +215,10 @@
 #' @seealso \code{\link{seas}} for the main function.
 #'   
 #' @references Vignette with a more detailed description: 
-#'   \url{http://cran.r-project.org/web/packages/seasonal/vignettes/seas.pdf}
+#'   \url{http://www.seasonal.website/seasonal.html}
 #'   
 #'   Comprehensive list of R examples from the X-13ARIMA-SEATS manual: 
-#'   \url{https://github.com/christophsax/seasonal/wiki/Examples-of-X-13ARIMA-SEATS-in-R}
+#'   \url{http://www.seasonal.website/examples.html}
 #'   
 #'   Official X-13ARIMA-SEATS manual: 
 #'   \url{http://www.census.gov/ts/x13as/docX13AS.pdf}
@@ -251,6 +251,13 @@
 #' # slidingspans spec
 #' series(m, "slidingspans.sfspans") 
 #' series(m, "slidingspans.tdspans") 
+#' 
+#' # fundamental identities of seasonal adjustment 
+#' # Y = T * I * (S * TD)
+#' all.equal(AirPassengers, series(m, "seats.trend") * 
+#'          series(m, "seats.irregular") * series(m, "seats.adjustfac"))
+#' # Y_sa = Y / (S * TD)
+#' all.equal(final(m), AirPassengers / series(m, "seats.adjustfac"))
 #' 
 #' ### Some X-13ARIMA-SEATS functions can be replicated in R:
 #' 

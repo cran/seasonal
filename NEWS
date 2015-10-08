@@ -1,4 +1,16 @@
-0.90.12  2015-08-??
+1.1.0  2015-10-08
+--------------------------------------------------------------------------------
+
+bug fixes
+  - single series are dimension-less ts objects, rather than n times 1 matrices
+  - more precise error msg in parse_spc
+
+documentation
+  - updated links to vignette and examples
+  - new example in series
+
+
+1.0.0  2015-08-14
 --------------------------------------------------------------------------------
 
 new features
@@ -10,7 +22,8 @@ new features
 
 enhancements
   - within-session parallelization: the temporary location name of the X13 run 
-    now changes each time, which makes the function suitable for within-session parallelization (e.g., with mclapply). Cluster parallelization using 
+    now changes each time, which makes the function suitable for within-session
+    parallelization (e.g., with mclapply). Cluster parallelization using 
     parlApply works as before and is recommended on Windows machines. 
     Thanks, Vidur Dhanda.
   - automated testing of all wiki examples on travis
