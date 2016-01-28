@@ -1,6 +1,19 @@
 R interface to X-13ARIMA-SEATS
 ------------------------------
 
+
+**No separate binary download required anymore!** *seasonal* now depends
+on the [x13binary][x13binary] package to access pre-built binaries of 
+X-13ARIMA-SEATS for all platforms. Many thanks to Dirk Eddelbuettel for the 
+fantastic work on x13binary!
+
+Installing seasonal *and* the binaries is now as easy as:
+
+    install.packages('seasonal')
+    
+
+### Introduction
+
 *seasonal* is an easy-to-use and full-featured R-interface to X-13ARIMA-SEATS,
 the newest seasonal adjustment software developed by the [United States Census
 Bureau][census]. X-13ARIMA-SEATS combines and extends the capabilities of the
@@ -31,58 +44,18 @@ model specs](#import-x-13-models-and-series) to R.
 
 ### Installation
 
-#### Getting seasonal
+Since version 1.2, *seasonal* relies on the [x13binary][x13binary] package to
+access prebuilt binaries of X-13ARIMA-SEATS. To install both packages, type to
+the R console:
+      
+    install.packages("seasonal")      
 
-The stable version is available from CRAN:
+This automatically installs *x13binary*. If you are using an older version of R
+(< 3.2) on Windows, you have to install *x13binary* from source:
 
-    install.packages("seasonal")
-
-To install the latest development version directly from Github, type to the R
-console:
-       
-    install.packages("devtools")       
-    devtools::install_github('christophsax/seasonal')      
-
-#### Getting X-13
-
-*seasonal* does not include the binary executables of X-13ARIMA-SEATS. They can
-be obtained precompiled from [here][census_win] (Windows: `x13ashtmlall.zip`).
-There are guides for building it from source for [Ubuntu][ubuntu] or [Mac
-OS-X][os-x].
-
-Download the file, unzip it and copy `x13ashtml.exe` (or `x13ashtml`, on Linux
-or OS-X) to any desired location on your file system.
-
-#### Telling R where to find X-13
-
-Next, you need to tell *seasonal* where to find the binary executables of 
-X-13ARIMA-SEATS, by setting the specific environmental variable `X13_PATH`. This
-may be done during your active session in R:
-
-    Sys.setenv(X13_PATH = "YOUR_X13_DIRECTORY")
+    install.packages("x13binary", type = "source") 
  
-Exchange `YOUR_X13_DIRECTORY` with the path to your installation of 
-X-13ARIMA-SEATS. Note that the Windows path `C:\something\somemore` has to be
-entered UNIX-like `C:/something/somemore` or `C:\\something\\somemore`. You can
-always check your installation with:
-
-    checkX13()
-
-If it works, you may want to set the environmental variable permanently, by
-adding the `Sys.setenv` line to one of your `.Rprofile` files. The easiest is to
-use the one located in your home directory, which can be written directly from
-R:
-
-    write('Sys.setenv(X13_PATH = "YOUR_X13_DIRECTORY")', 
-          file = "~/.Rprofile", append = TRUE)
-
-If the file does not exist (by default), it will be created. Make sure that you
-get the quotes right: double quotes around your directory, single quotes around
-the whole `Sys.setenv` line, such that R understands your string. Check first
-that the the `Sys.setenv` line works correctly; once it is written you may have
-to edit `.Rprofile` manually. (Or add a second, overwriting line to it.) For
-other ways to set an environmental variable permanently in R, see `?Startup`.
-
+See the documentation of `?seasonal` if you want to set the path to X-13 manually.
 
 ### Getting started
 
@@ -156,7 +129,7 @@ order to set the 'variables' argument of the 'regression' spec equal to `td` and
    
 Note that R vectors may be used as an input. If a spec is added without any
 arguments, the spec should be set equal to an empty string (or, alternatively,
-to an empty list, as in previous versions). Several defaults of `seas` are empty
+to an empty list, as in early versions). Several defaults of `seas` are empty
 strings, such as the default `seats = ""`. See the help page (`?seas`) for more
 details on the defaults. Note the difference between `""` (meaning the spec is
 enabled but has no arguments) and `NULL` (meaning the spec is disabled).
@@ -439,7 +412,7 @@ file, and the `import.spc` function will construct the corresponding call to
 `seas` as well as the calls for importing the data.
 
     # importing the orginal X-13 example file
-    import.spc(file.path(path.package("seasonal"), "tests", "Testairline.spc"))
+    import.spc(system.file("tests", "Testairline.spc", package="seasonal"))
 
 If data is stored outside the `.spc` file (as it usually will be), the
 calls will make use of the `import.ts` function, which imports arbitrary X-13
@@ -456,11 +429,14 @@ freely available under the terms of its own [license][license].
 Secretariat of Economic Affairs. It has been greatly improved over time thanks
 to suggestions and support from Matthias Bannert, Freya Beamish, Vidur Dhanda,
 Alain Galli, Ronald Indergand, Preetha Kalambaden, Stefan Leist, James Livsey,
-Brian Monsell, Pinaki Mukherjee, Bruno Parnisari, and many others.
+Brian Monsell, Pinaki Mukherjee, Bruno Parnisari, and many others. I am
+especially grateful to Dirk Eddelbuettel for the fantastic work on the
+[x13binary][x13binary] package.
 
 Please report bugs and suggestions on [Github][github] or send me an 
 [e-mail](mailto:christoph.sax@gmail.com). Thank you!
 
+[x13binary]: https://cran.r-project.org/package=x13binary "X-13ARIMA-SEATS binary for R"
 
 [manual]: http://www.census.gov/ts/x13as/docX13ASHTML.pdf "Reference Manual"
 

@@ -62,7 +62,7 @@
 #'   alternative to the \code{...} argument. It is useful for programming.
 #'
 #' @return returns an object of class \code{"seas"}, essentially a list with the
-#'   following elements: 
+#'   following components: 
 #'   \item{series}{a list containing the output tables of X-13. To be accessed 
 #'   by the \code{series} function.} 
 #'   \item{data}{seasonally adjusted data, the 
@@ -196,12 +196,14 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
          automdl = "", na.action = na.omit,
          out = FALSE, dir = NULL, ..., list = NULL){
   
+  # setX13Path()
+  
   # intial checks
   checkX13(fail = TRUE, fullcheck = FALSE, htmlcheck = FALSE)
   
   # lookup table for output specification
   SPECS <- NULL 
-  data(specs, envir = environment())  # avoid side effects
+  data(specs, envir = environment(), package = "seasonal")  # avoid side effects
   SERIES_SUFFIX <- SPECS$short[SPECS$is.series]
   
   # save series name
@@ -457,7 +459,7 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
 
   if (!is.null(ff)){
     if (!as.numeric(z$udg['freq']) %in% ff){
-      msg <- paste0("Frequency of imported data (", frequency(z$data), ") is not equal to frequency of detected by X-13 (", as.numeric(z$udg['freq']), "). X-13 retured the addital messages: \n\n")
+      msg <- paste0("Frequency of imported data (", ff, ") is not equal to frequency of detected by X-13 (", as.numeric(z$udg['freq']), "). X-13 retured the addital messages: \n\n")
       drop_x13messages(z$err, msg = msg, ontype = "all")
     }
   }
