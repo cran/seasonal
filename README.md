@@ -1,7 +1,6 @@
 R interface to X-13ARIMA-SEATS
 ------------------------------
 
-
 **No separate binary download required anymore!** *seasonal* now depends
 on the [x13binary][x13binary] package to access pre-built binaries of 
 X-13ARIMA-SEATS for all platforms. Many thanks to Dirk Eddelbuettel for the 
@@ -9,8 +8,8 @@ fantastic work on x13binary!
 
 Installing seasonal *and* the binaries is now as easy as:
 
-    install.packages('seasonal')
-    
+    install.packages("seasonal")
+
 
 ### Introduction
 
@@ -48,12 +47,12 @@ Since version 1.2, *seasonal* relies on the [x13binary][x13binary] package to
 access prebuilt binaries of X-13ARIMA-SEATS. To install both packages, type to
 the R console:
       
-    install.packages("seasonal")      
+    install.packages("seasonal")
 
 This automatically installs *x13binary*. If you are using an older version of R
-(< 3.2) on Windows, you have to install *x13binary* from source:
+(< 3.2) on Windows, you may have to install *seasonal* from source:
 
-    install.packages("x13binary", type = "source") 
+    install.packages("seasonal", type = "source") 
  
 See the documentation of `?seasonal` if you want to set the path to X-13 manually.
 

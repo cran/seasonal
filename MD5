@@ -1,8 +1,8 @@
-2e3b7e033da3d9a4cce5fbd8b0614ead *DESCRIPTION
+d100dd072fd9cbf7f327b3b095535fc3 *DESCRIPTION
 5f94a467b9dd3726c837ddf1bd7c6c52 *NAMESPACE
-c607776972ef277a245290794858a38c *NEWS
+88d6dcc56e95bbd2679d1e952f20a2d8 *NEWS
 d8c52c5a7f5947d4558591dae4feaa27 *R/base.methods.R
-4908cf3dd4aed492a3fe8ddd44bf49fa *R/checkX13.R
+054d0f257b75dc652e762b7089d7fd58 *R/checkX13.R
 c615a041ee86750faab4b2a7145ff073 *R/deparse.R
 49a416a74570f5939a5f771146fc6217 *R/detect.R
 5ed72021e1e4aba6504c5e50f8f26489 *R/diagnostics.R
@@ -23,15 +23,15 @@ fef9ef8eb21cd03c0ff0234a2e4b0aa5 *R/read_est.R
 12af817f72544b5278b3c2b08459e6a9 *R/read_series.R
 6fce5c73f2ec9e85b73d09483354ceae *R/read_udg.R
 71259d0a4657b35b72afdeb43a1f1369 *R/reeval.R
-59abe5f8a2124086395ad907c2cfc8b3 *R/seas.R
+16d4c2f87cea62f3ba6af02f1d3f32f7 *R/seas.R
 652b0aa0472cd78a7e25ecca1455011c *R/seasonal-package.R
 973c2d825548816b879e5a76ace865d4 *R/series.R
 852b2de5019bee9e81a99d9c37e21c0b *R/spclist.R
-0c8e75c84312ac5d506fc36aa787a238 *R/startup.R
+a85b634a175b6788e6da0cba1e6b9183 *R/startup.R
 05ec62354e95be73d1dfc4d66d209534 *R/static.R
 509309b0bef83a494fbfaecd95b15471 *R/summary.R
 0cf8a4273aa4ad1b4464a1c62f33486a *R/x13messages.R
-e9a03e8c8cee4abb779cba7b9f4f67f7 *README.md
+16047346a2c9114136b8338de575d6b9 *README.md
 bf34d72d5eaa3283c84e4074b8747e01 *build/vignette.rds
 90097c4a062d728ae5df6f8cc07c3353 *data/holiday.RData
 d940c5162bfa63ff7d3d9487165c100b *data/inspectdata.rdata
@@ -40,7 +40,7 @@ c638cabf0fcd782e83e2be54882bf9df *data/specs.RData
 afb9abf6c0699199d216ee059a98e2d5 *demo/00Index
 d070200585ff94b4f92e6a22cf6bf286 *demo/seas.R
 fb10e85a24b7d30e8272a91ab54f3e0c *inst/doc/seas.Rnw
-9ecd40516c3cad35b18f5054ffd781ce *inst/doc/seas.pdf
+c7a94e0a97f0fcfbd0fe48c5ccd6416c *inst/doc/seas.pdf
 e6e1f978925675455ca786fa138be916 *inst/inspect/www/css/docs.css
 7fb5dbde902bdff2039020ccd85371dc *inst/inspect/www/index.html
 3c5d125dbeab38f00d8da4c1de6027d5 *inst/tests/Testairline.spc
@@ -67,6 +67,6 @@ ec348d9c63b775adc0e617d388f04e76 *man/qs.Rd
 cba591b8c91cfcf9b8da3047eba4e7af *man/static.Rd
 3cb787a87b97a9d7b1041500469dbcbe *man/summary.seas.Rd
 8661d03708bcc2d9a79afdf29bf384eb *tests/cran-tests.R
-1505094bfc0cfcb3895f51fc70b0e9b1 *vignettes/README.tex
+3163c1c107d9f6f713d227445d5e98cf *vignettes/README.tex
 9aa7821c18cc93deea65af509601cd26 *vignettes/images/inspect.jpg
 fb10e85a24b7d30e8272a91ab54f3e0c *vignettes/seas.Rnw
