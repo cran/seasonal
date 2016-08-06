@@ -72,7 +72,6 @@ returns an object of class \code{"seas"}, essentially a list with the
   \item{err}{warning messages from X-13ARIMA-SEATS} 
   \item{udg}{content of the \code{.udg} output file} 
   \item{est}{content of the \code{.est} output file} 
-  \item{lks}{content of the \code{.lks} output file} 
   \item{model}{list with the model specification, 
   similar to \code{"spc"}. It typically contains \code{"regression"}, which 
   contains the regressors and parameter estimates, and \code{"arima"}, which 
@@ -90,24 +89,25 @@ returns an object of class \code{"seas"}, essentially a list with the
   series. \code{summary} gives an overview of the regARIMA model.
 }
 \description{
-Core function of the seasonal package. With the default options, \code{seas} calls the 
-automatic procedures of X-13ARIMA-SEATS to perform a seasonal adjustment that
-works well in most circumstances. Via the \code{...} argument, it is possible
-to invoke almost all options that are available in X-13ARIMA-SEATS (see 
-details). The default options of \code{seas} are listed as explicit arguments and are 
-discussed in the arguments section.
+Main function of the seasonal package. With the default options,
+\code{seas} calls the  automatic procedures of X-13ARIMA-SEATS to perform a
+seasonal adjustment that works well in most circumstances. Via the \code{...}
+argument, it is possible to invoke almost all options that are available in
+X-13ARIMA-SEATS (see  details). The default options of \code{seas} are listed
+as explicit arguments and are  discussed in the arguments section.
 }
 \details{
-It is possible to use the almost complete syntax of X-13ARIMA-SEAT via the 
-\code{...} argument. The syntax of X-13ARIMA-SEATS uses \emph{specs} and 
-\emph{arguments}, and each spec optionally contains some arguments. In 
-\code{seas}, an additional spec-argument can be added by separating spec and 
-argument by a dot (\code{.}) (see examples). Alternatvily, spec-argument 
-combinations can be supplied as a named list, which is useful for programming.
+It is possible to use the almost complete syntax of X-13ARIMA-SEAT via the
+\code{...} argument. The syntax of X-13ARIMA-SEATS uses \emph{specs} and
+\emph{arguments}, and each spec optionally contains some arguments. In
+\code{seas}, an additional spec-argument can be added by separating spec and
+argument by a dot (\code{.}) (see examples). Alternatvily, spec-argument
+combinations can be supplied as a named list, which is useful for
+programming.
 
-Similarily, the 
-\code{\link{series}} function can be used to read almost all series from 
-X-13ARIMA-SEATS.
+Similarily, the \code{\link{series}} function can be used to read almost all
+series from X-13ARIMA-SEATS. The \code{\link{udg}} function provides access
+to a large number of diagnostical statistics.
 
 For a more extensive description, consider the vignette or the wiki page, 
 which contains replications of almost all examples from the official 
@@ -201,7 +201,7 @@ Vignette with a more detailed description:
   \url{http://www.seasonal.website/examples.html}
   
   Official X-13ARIMA-SEATS manual: 
-  \url{http://www.census.gov/ts/x13as/docX13AS.pdf}
+  \url{https://www.census.gov/ts/x13as/docX13ASHTML.pdf}
 }
 \seealso{
 \code{\link{static}}, to return the static call that is needed to 
@@ -216,6 +216,6 @@ Vignette with a more detailed description:
 
 \code{\link{plot.seas}}, for diagnostical plots.
 
-\code{\link{qs}}, for diagnostical statistics.
+\code{\link{udg}}, for diagnostical statistics.
 }
 

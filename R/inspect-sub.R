@@ -20,14 +20,13 @@ PrintSummarySeas <- function(x, digits = max(3, getOption("digits") - 3),
   }
   
   cat("  ARIMA:", x$model$arima$model)
-
-  cat("  Obs.:", formatC(x$lks['nobs'], format = "d"))
+  cat("  Obs.:", formatC(x$nobs, format = "d"))
   cat("  Transform:", x$transform.function)
-  cat("\nAICc:", formatC(x$lks['Aicc'], digits = digits))
-  cat(", BIC:", formatC(x$lks['bic'], digits = digits))
+  cat("\nAICc:", formatC(x$aicc, digits = digits))
+  cat(", BIC:", formatC(x$bic, digits = digits))
 
   # QS Test
-  qsv <- qs(x)[c('qssadj'), ]
+  qsv <- x$qsv
   qsstars <- symnum(as.numeric(qsv['p-val']), 
                     corr = FALSE, na = FALSE, legend = FALSE,
                     cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1), 
@@ -320,6 +319,11 @@ AddFOpts <- function(x, FOpts){
     }
 
     if ("regression.aictest" %in% names(lc)){ # non default, specified
+      
+      if (inherits(lc$regression.aictest, "call")){
+        lc$regression.aictest <- eval(lc$regression.aictest)
+      }
+
       lc$regression.aictest <- setdiff(lc$regression.aictest, "easter")
       if (length(lc$regression.aictest) == 0){
         lc['regression.aictest'] <- NULL
@@ -351,6 +355,10 @@ AddFOpts <- function(x, FOpts){
       lc$regression.variables <- union(C2C(lc$regression.variables), FOpts$td)
     }
 
+    if (inherits(lc$regression.aictest, "call")){
+      lc$regression.aictest <- eval(lc$regression.aictest)
+    }
+    
     if ("regression.aictest" %in% names(lc)){ # non default, specified
       lc$regression.aictest <- setdiff(lc$regression.aictest, "td")
       if (length(lc$regression.aictest) == 0){

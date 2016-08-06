@@ -48,13 +48,10 @@ access prebuilt binaries of X-13ARIMA-SEATS. To install both packages, type to
 the R console:
       
     install.packages("seasonal")
-
-This automatically installs *x13binary*. If you are using an older version of R
-(< 3.2) on Windows, you may have to install *seasonal* from source:
-
-    install.packages("seasonal", type = "source") 
  
-See the documentation of `?seasonal` if you want to set the path to X-13 manually.
+See the documentation of `?seasonal` if you want to set the path to X-13
+manually.
+
 
 ### Getting started
 
@@ -194,7 +191,7 @@ is also possible to return more than one output table at the same time:
 
     series(m, c("forecast.forecasts", "d1"))
    
-You can use either the unique short names of X-13 (such as `d1`), or the the
+You can use either the unique short names of X-13 (such as `d1`), or the
 long names (such as `forecasts`). Because the long table names are not unique,
 they need to be combined with the spec name (`forecast`). See `?series` for a
 complete list of options.
@@ -211,11 +208,16 @@ allows you to separate these specs from the basic model call:
     m <- seas(AirPassengers)
     series(m, "history.saestimates")
     series(m, "slidingspans.sfspans")
+
+The `udg` function provides access to a large number of diagnostical statistics:
+
+    udg(x, "x13mdl")
     
 If you are using the HTML version of X-13, the `out` function shows the content
 of the main output in the browser:
 
     out(m)
+
 
 ### Graphs
 
@@ -362,21 +364,21 @@ different automated routine.
     dta <- list(fdeaths = fdeaths, mdeaths = mdeaths)
 
     # loop over dta
-    ll <- lapply(dta, function(e) try(seas(e, x11 = "")))
+    l1 <- lapply(dta, function(e) try(seas(e, x11 = "")))
 
     # list failing models
-    is.err <- sapply(ll, class) == "try-error"
-    ll[is.err]
+    is.err <- sapply(l1, class) == "try-error"
+    l1[is.err]
 
     # return final series of successful evaluations
-    do.call(cbind, lapply(ll[!is.err], final))
+    do.cal1(cbind, lapply(l1[!is.err], final))
 
 
 If you have several cores and want to speed things up, the process is well
 suited for parallelization:
 
     # a list with 100 time series
-    largedta <- rep(list(AirPassengers), 100)
+    l2 <- rep(list(AirPassengers), 100)
 
     library(parallel)  # this is part of a standard R installation
 
@@ -389,10 +391,10 @@ suited for parallelization:
     clusterEvalQ(cl, library(seasonal))
 
     # export data to each node
-    clusterExport(cl, varlist = "largedta")
+    clusterExport(cl, varlist = "l2")
 
-    # run in parallel (2.2s on a 8-core Macbook, vs 9.6s with standard lapply)
-    parLapply(cl, largedta, function(e) try(seas(e, x11 = "")))
+    # run in parallel (2.2s on a 4-core / 8-thread Macbook, vs 9.6s with standard lapply)
+    parLapply(cl, l2, function(e) try(seas(e, x11 = "")))
 
     # finally, stop the cluster
     stopCluster(cl)
@@ -400,8 +402,7 @@ suited for parallelization:
 On Linux or OS-X, 'forking' parallelization allows you to do the same in a
 single line:
 
-    mclapply(cl, largedta, function(e) try(seas(e, x11 = "")))
-
+    mclapply(l2, function(e) try(seas(e, x11 = "")), mc.cores = detectCores())
 
 ### Import X-13 models and series
 

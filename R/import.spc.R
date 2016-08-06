@@ -222,7 +222,7 @@ rem_defaults_from_args <- function(x) {
   # output defaults
   d <- list(transform.print = "aictransform",
              automdl.print = "bestfivemdl",
-             estimate.save = c("model", "estimates", "lkstats", "residuals"),
+             estimate.save = c("model", "estimates", "residuals"),
              spectrum.print = "qs",
              x11.save = c("d10", "d11", "d12", "d13", "d16", "e18"),
              seats.save = c("s10", "s11", "s12", "s13", "s16", "s18")
@@ -447,7 +447,7 @@ import_tramo <- function(file){
 
   z <- as.numeric(txt[3:length(txt)])
   if (length(z) != ssp[1]){
-    message("tramo format: number of obs. different to speicification, which will be ignored.")
+    message("tramo format: number of obs. different to specification, which will be ignored.")
   }
 
   ts(z, start = c(ssp[2], ssp[3]), frequency = ssp[4])
