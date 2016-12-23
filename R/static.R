@@ -1,28 +1,34 @@
 #' Static Call of a seas Object
 #' 
-#' A static call is a static replication of a call. Automatic procedures are 
-#' substituted by the automatically chosen spec-argument options. The call can
-#' be copy/pasted to a script and used for further manipulations or future 
-#' evaluation of the same model.
+#' In a 'static' call, the default automatic procedures in the model call
+#' are substituted by the choices they made. 
+#' 
+#' If \code{evaluate = TRUE}, the call is evaluated. The call can be copy/pasted 
+#' to a script and used for further manipulations or future evaluation of the 
+#' same model.
 #' 
 #' By default, the static call is tested. It is executed and compared to the 
 #' input call. If the final series is not identical, a message is returned.
 #' 
-#' If \code{coef = TRUE}, the coefficients are fixed as well.
+#' If \code{coef = TRUE}, the coefficients are fixed as well. If 
+#' \code{x11.filter = TRUE}, the X-11 moving averages are fixed as well.
 #' 
 #' @param x an object of class \code{seas}.
-#' @param coef  logical, if \code{TRUE}, the coefficients are treated as fixed, 
+#' @param coef  logical. If \code{TRUE}, the coefficients are treated as fixed, 
 #'   instead of beeing estimated.
+#' @param x11.filter logical. X-11 only. if \code{TRUE}, the X-11 moving 
+#'   averages will be fixed as well. This leads to different filters at
+#'   different stages, and the resulting series can be are slightly different.
+#'   If \code{test = TRUE}, this may cause a warning  message.
 #' @param test logical. By default the static call is executed and compared to 
-#'   the input call. If the final series is not identical, a warning is 
-#'   returned. If \code{FALSE}, the option is disabled.
-#' @param verbose logical, if \code{TRUE}, droped and kept series are listed.
-#' @param fail logical, if \code{TRUE}, differences will cause an error. Ignored 
+#'   the input call. If the final series is not identical, a message is 
+#'   returned. If \code{FALSE}, no test is performed (faster).
+#' @param fail logical. If \code{TRUE}, differences will cause an error. Ignored 
 #'   if \code{test = FALSE}.
-#' 
-#' @return Object of class \code{"call"}. Static call of an object of class
-#'   \code{seas}. Can be copy/pasted into an R script.
-#'   
+#' @param evaluate logical. If \code{TRUE}, the call is evaluated.
+#' @return Object of class \code{"call"}. Or an object of class \code{"seas"} 
+#'   if \code{evaluate = TRUE}.
+#' @seealso \code{\link[stats]{getCall}} to extract the actual call.
 #' @seealso \code{\link{seas}} for the main function of seasonal.
 #'   
 #' @references Vignette with a more detailed description: 
@@ -39,11 +45,19 @@
 #' \dontrun{
 #' 
 #' m <- seas(AirPassengers)
-#' static(m)
-#' static(m, test = FALSE)
+#' getCall(m)                   # default call
+#' static(m)                    # static call
+#' static(m, test = FALSE)      # much faster
+#' static(m, evaluate = TRUE)   # returns an object of class "seas"
+#' 
+#' m <- seas(AirPassengers, x11 = "")
+#' 
+#' static(m, x11.filter = TRUE) # also fixes the X-11 filter (with a warning)
+#' static(m, coef = TRUE)       # also fixes the coefficients
 #' }
-static <- function(x, coef = FALSE, test = TRUE, verbose = FALSE, fail = FALSE){
-  
+static <- function(x, coef = FALSE, x11.filter = FALSE, test = TRUE, 
+                   fail = FALSE, evaluate = FALSE){
+
   if (!inherits(x, "seas")){
     stop("first argument must be of class 'seas'")
   }
@@ -73,6 +87,21 @@ static <- function(x, coef = FALSE, test = TRUE, verbose = FALSE, fail = FALSE){
 
   lc$transform.function = transformfunction(x)
 
+  # substitute X-11 filters
+  if (x11.filter){
+    if (!is.null(x$spc$x11)) {
+      if (is.null(lc$x11.trendma) || lc$x11.trendma == ""){
+        tma <- udg(x, "finaltrendma", fail = FALSE)
+        lc$x11.trendma <- as.numeric(unname(tma))
+      }
+      if (is.null(lc$x11.seasonalma) || lc$x11.seasonalma == ""){
+        sma <- udg(x, "sfmsr", fail = FALSE)
+        if (!is.null(sma)) sma <- paste0("s", sma)
+        lc$x11.seasonalma <- unname(sma)
+      }
+    }
+  }
+
   if (coef){
     if (!is.null(x$model$regression$b)) {
       lc$regression.b = c(add_f(x$model$regression$b))
@@ -84,11 +113,6 @@ static <- function(x, coef = FALSE, test = TRUE, verbose = FALSE, fail = FALSE){
       lc$arima.ar = add_f(x$model$arima$ar)
     }
   }
-  
-  if (verbose){
-    cat("Droped:", paste(names(as.list(x$call)[!(names(as.list(x$call)) %in% names(lc))]), collapse=", "), "\n")
-    cat("Kept:", paste(names(as.list(x$call)[(names(as.list(x$call)) %in% names(lc))]), collapse=", "), "\n")
-  }
 
   z <- as.call(lc)
   
@@ -99,6 +123,10 @@ static <- function(x, coef = FALSE, test = TRUE, verbose = FALSE, fail = FALSE){
     if (!isTRUE(test)){
       (if (fail) stop else message)(paste("Static series is different.", test))
     }
+  }
+
+  if (evaluate){
+    return(eval(z, envir = parent.frame()))
   }
 
   z

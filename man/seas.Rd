@@ -46,7 +46,7 @@ contain NAs. \code{na.omit} (default), \code{na.exclude} or \code{na.fail}.
 If \code{na.action = na.x13}, NA handling is done by X-13, i.e. NA values 
 are substituted by -99999.}
 
-\item{out}{logical, should the X-13ARIMA-SEATS standard output be saved in 
+\item{out}{logical. Should the X-13ARIMA-SEATS standard output be saved in 
 the \code{"seas"} object? (this increases object size substantially, it is 
 recommended to re-evaluate the model using the \code{\link{out}} function 
 instead.)}
@@ -86,7 +86,8 @@ returns an object of class \code{"seas"}, essentially a list with the
   
   The \code{final} function returns the final adjusted series, the 
   \code{plot} method shows a plot with the unadjusted and the adjusted 
-  series. \code{summary} gives an overview of the regARIMA model.
+  series. \code{summary} gives an overview of the regARIMA model. The 
+  \code{\link{udg}} function returns diagnostical statistics.
 }
 \description{
 Main function of the seasonal package. With the default options,
@@ -94,7 +95,9 @@ Main function of the seasonal package. With the default options,
 seasonal adjustment that works well in most circumstances. Via the \code{...}
 argument, it is possible to invoke almost all options that are available in
 X-13ARIMA-SEATS (see  details). The default options of \code{seas} are listed
-as explicit arguments and are  discussed in the arguments section.
+as explicit arguments and are  discussed in the arguments section. A
+full-featured graphical user interface can be accessed by the 
+\code{\link{view}} function.
 }
 \details{
 It is possible to use the almost complete syntax of X-13ARIMA-SEAT via the
@@ -115,8 +118,12 @@ X-13ARIMA-SEATS manual.
 }
 \examples{
 \dontrun{
+Basic call
 m <- seas(AirPassengers) 
 summary(m)
+
+# Graphical user interface
+view(m)
 
 # invoke X-13ARIMA-SEATS options as 'spec.argument' through the ... argument
 # (consult the X-13ARIMA-SEATS manual for many more options and the list of
@@ -150,8 +157,12 @@ static(m)  # this also tests the equivalence of the static call
 static(m, test = FALSE)  # no testing (much faster)
 static(m, coef = TRUE)  # also fixes the coefficients
 
+# updating an existing model
+update(m, x11 = "")
+
 # specific extractor functions
 final(m) 
+predict(m)   # equivalent
 original(m) 
 resid(m) 
 coef(m)
@@ -188,8 +199,17 @@ final(seas(AirPassengersNA, na.action = na.exclude)) # NA in final series
 AirPassengersNA[20] <- NA 
 final(seas(AirPassengersNA, na.action = na.x13))
 
-# inspect tool
-inspect(m)
+## performing 'composite' adjustment
+m.direct <- seas(ldeaths, x11 = "")
+final.direct <- final(m.direct)
+m.indirect <- lapply(list(mdeaths, fdeaths), seas, x11 = "")
+
+ # not very efficient, but keeps time series properties
+final.indirect <- Reduce(`+`, lapply(m.indirect, final)) 
+
+ts.plot(cbind(final.indirect, final(m.direct)), col = 1:2)
+legend("topright", legend = c("disagregated", "aggregated"), lty = 1, col = 1:2)
+
 }
 
 }
@@ -204,18 +224,16 @@ Vignette with a more detailed description:
   \url{https://www.census.gov/ts/x13as/docX13ASHTML.pdf}
 }
 \seealso{
-\code{\link{static}}, to return the static call that is needed to 
-  replicate an automatic model
+\code{\link{view}}, for accessing the graphical user interface.
+
+\code{\link{update.seas}}, to update an existing \code{"seas"} 
+  model.
+
+\code{\link{static}}, to return the 'static' call, with automated
+  procedures substituted by their choices.
 
 \code{\link{series}}, for universal X-13 table series import.
 
-\code{\link{out}}, for the import of X-13 text files
-
-\code{\link{inspect}}, to interactively inspect a seasonal 
-  adjustment model.
-
-\code{\link{plot.seas}}, for diagnostical plots.
-
-\code{\link{udg}}, for diagnostical statistics.
+\code{\link{out}}, to view the full X-13 diagnostical output.
 }
 

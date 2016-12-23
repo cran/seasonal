@@ -4,45 +4,61 @@
 \alias{static}
 \title{Static Call of a seas Object}
 \usage{
-static(x, coef = FALSE, test = TRUE, verbose = FALSE, fail = FALSE)
+static(x, coef = FALSE, x11.filter = FALSE, test = TRUE, fail = FALSE,
+  evaluate = FALSE)
 }
 \arguments{
 \item{x}{an object of class \code{seas}.}
 
-\item{coef}{logical, if \code{TRUE}, the coefficients are treated as fixed, 
+\item{coef}{logical. If \code{TRUE}, the coefficients are treated as fixed, 
 instead of beeing estimated.}
 
+\item{x11.filter}{logical. X-11 only. if \code{TRUE}, the X-11 moving 
+averages will be fixed as well. This leads to different filters at
+different stages, and the resulting series can be are slightly different.
+If \code{test = TRUE}, this may cause a warning  message.}
+
 \item{test}{logical. By default the static call is executed and compared to 
-the input call. If the final series is not identical, a warning is 
-returned. If \code{FALSE}, the option is disabled.}
+the input call. If the final series is not identical, a message is 
+returned. If \code{FALSE}, no test is performed (faster).}
 
-\item{verbose}{logical, if \code{TRUE}, droped and kept series are listed.}
-
-\item{fail}{logical, if \code{TRUE}, differences will cause an error. Ignored 
+\item{fail}{logical. If \code{TRUE}, differences will cause an error. Ignored 
 if \code{test = FALSE}.}
+
+\item{evaluate}{logical. If \code{TRUE}, the call is evaluated.}
 }
 \value{
-Object of class \code{"call"}. Static call of an object of class
-  \code{seas}. Can be copy/pasted into an R script.
+Object of class \code{"call"}. Or an object of class \code{"seas"} 
+  if \code{evaluate = TRUE}.
 }
 \description{
-A static call is a static replication of a call. Automatic procedures are 
-substituted by the automatically chosen spec-argument options. The call can
-be copy/pasted to a script and used for further manipulations or future 
-evaluation of the same model.
+In a 'static' call, the default automatic procedures in the model call
+are substituted by the choices they made.
 }
 \details{
+If \code{evaluate = TRUE}, the call is evaluated. The call can be copy/pasted 
+to a script and used for further manipulations or future evaluation of the 
+same model.
+
 By default, the static call is tested. It is executed and compared to the 
 input call. If the final series is not identical, a message is returned.
 
-If \code{coef = TRUE}, the coefficients are fixed as well.
+If \code{coef = TRUE}, the coefficients are fixed as well. If 
+\code{x11.filter = TRUE}, the X-11 moving averages are fixed as well.
 }
 \examples{
 \dontrun{
 
 m <- seas(AirPassengers)
-static(m)
-static(m, test = FALSE)
+getCall(m)                   # default call
+static(m)                    # static call
+static(m, test = FALSE)      # much faster
+static(m, evaluate = TRUE)   # returns an object of class "seas"
+
+m <- seas(AirPassengers, x11 = "")
+
+static(m, x11.filter = TRUE) # also fixes the X-11 filter (with a warning)
+static(m, coef = TRUE)       # also fixes the coefficients
 }
 }
 \references{
@@ -56,6 +72,8 @@ Vignette with a more detailed description:
   \url{https://www.census.gov/ts/x13as/docX13ASHTML.pdf}
 }
 \seealso{
+\code{\link[stats]{getCall}} to extract the actual call.
+
 \code{\link{seas}} for the main function of seasonal.
 }
 

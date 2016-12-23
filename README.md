@@ -1,15 +1,7 @@
 R interface to X-13ARIMA-SEATS
 ------------------------------
 
-**No separate binary download required anymore!** *seasonal* now depends
-on the [x13binary][x13binary] package to access pre-built binaries of 
-X-13ARIMA-SEATS for all platforms. Many thanks to Dirk Eddelbuettel for the 
-fantastic work on x13binary!
-
-Installing seasonal *and* the binaries is now as easy as:
-
-    install.packages("seasonal")
-
+[![Build Status](https://travis-ci.org/christophsax/seasonal.svg?branch=master)](https://travis-ci.org/christophsax/seasonal) [![Build status](https://ci.appveyor.com/api/projects/status/y64skjd1g29t2gab?svg=true)](https://ci.appveyor.com/project/christophsax/seasonal)
 
 ### Introduction
 
@@ -17,7 +9,13 @@ Installing seasonal *and* the binaries is now as easy as:
 the newest seasonal adjustment software developed by the [United States Census
 Bureau][census]. X-13ARIMA-SEATS combines and extends the capabilities of the
 older X-12ARIMA (developed by the Census Bureau) and TRAMO-SEATS (developed by
-the Bank of Spain).
+the Bank of Spain). 
+
+*seasonal* depends on the [x13binary][x13binary] package (by
+Dirk Eddelbuettel and Christoph Sax) to access pre-built binaries of 
+X-13ARIMA-SEATS for all platforms and **does not require any manual installation**.
+
+![Graphical user interface for X-13](https://raw.githubusercontent.com/christophsax/seasonal/master/vignettes/images/view.jpg)
 
 If you are new to seasonal adjustment or X-13ARIMA-SEATS, the automated
 procedures of *seasonal* allow you to quickly produce good seasonal adjustments
@@ -33,19 +31,19 @@ replicate in basic R. Read the [Input](#input) and [Output](#output) sections
 and have a look at the [website of seasonal][examples], where the examples from
 the official X-13ARIMA-SEATS [manual][manual] are reproduced in R.
 
-*seasonal* includes a [graphical user interface](#inspect) that facitlitates the
+*seasonal* includes a [graphical user interface](#graphical-user-interface) that facitlitates the
 use of X-13 both for beginners and advanced users. The final sections of this
-vignette cover additional topics: [User defined holidays](#chinese-new- year-
-indian-diwali-in-other-customized-holidays), such as Chinese New Year, the [use
+vignette cover additional topics: 
+[User defined holidays](#chinese-new-year-indian-diwali-and-other-customized-holidays), 
+such as Chinese New Year, the [use
 of seasonal for production](#production-use), and the [import of existing X-13
 model specs](#import-x-13-models-and-series) to R.
 
 
 ### Installation
 
-Since version 1.2, *seasonal* relies on the [x13binary][x13binary] package to
-access prebuilt binaries of X-13ARIMA-SEATS. To install both packages, type to
-the R console:
+*seasonal* relies on the [x13binary][x13binary] package to access prebuilt
+binaries of X-13ARIMA-SEATS. To install both packages, type to the R console:
       
     install.packages("seasonal")
  
@@ -103,11 +101,11 @@ easily generated from the automatic model:
     static(m)
     static(m, coef = TRUE)  # also fixes the coefficients
     
-If you have *Shiny* installed, the `inspect` command offers an easy  way to
-analyze and modify a seasonal adjustment procedure (see the section below for
-details):
+If you have [seasonalview][seasonalview] installed, the `view` command offers an 
+easy way to analyze and modify a seasonal adjustment procedure (see the section 
+below for details):
 
-    inspect(m)
+    view(m)
 
 
 
@@ -144,7 +142,7 @@ For instance, example 1 in section 7.1 from the [manual][manual],
 translates to R in the following way:
 
     seas(AirPassengers,
-         x11 = ""),
+         x11 = "",
          arima.model = "(0 1 1)"
     )
     
@@ -174,6 +172,22 @@ a named list. This is useful for programming:
 
     seas(list = list(x = AirPassengers, x11 = ""))
 
+Additionally, `"seas"` objects can be altered using the `update` method. It
+uses the same syntax as the `seas` function. The following example turns off
+trading day adjustment and switches the adjustment method to X-11:
+
+    update(m, regression.variables = "td", x11 = "")
+
+A common use of `update` involves the recomputing with an `x` argument
+containing new data:
+
+    update(m, x = sqrt(AirPassengers))
+
+Lastly, a `predict` method can be used to extract the final series from an
+updated call, using the familar `newdata` argument: 
+
+    predict(m, newdata = sqrt(AirPassengers))
+
 
 ### Output
 
@@ -189,7 +203,7 @@ Because the `forecast.save = "forecasts"` argument has not been specified in the
 model call, `series` re-evaluates the call with the 'forecast' spec enabled. It
 is also possible to return more than one output table at the same time:
 
-    series(m, c("forecast.forecasts", "d1"))
+    series(m, c("forecast.forecasts", "s12"))
    
 You can use either the unique short names of X-13 (such as `d1`), or the
 long names (such as `forecasts`). Because the long table names are not unique,
@@ -211,7 +225,7 @@ allows you to separate these specs from the basic model call:
 
 The `udg` function provides access to a large number of diagnostical statistics:
 
-    udg(x, "x13mdl")
+    udg(m, "x13mdl")
     
 If you are using the HTML version of X-13, the `out` function shows the content
 of the main output in the browser:
@@ -227,7 +241,6 @@ outliers. Optionally, it also draws the trend of the seasonal decomposition:
 
     m <- seas(AirPassengers, regression.aictest = c("td", "easter"))
     plot(m)
-    plot(m, trend = TRUE)
 
 The `monthplot` function allows for a monthwise plot (or quarterwise, with the
 same function name) of the seasonal and the SI component:
@@ -248,38 +261,39 @@ click. Click several times to loop through different outlier types.
     identify(m)
 
 
-### Inspect
+### Graphical User Interface
 
-The `inspect` function is a graphical tool for choosing a seasonal adjustment
-model, using *[Shiny][shiny]*, with the same structure as the [demo website of
-seasonal][seasweb]. To install the latest version of Shiny, type:
+The `view` function is a graphical tool for choosing a seasonal adjustment
+model, using the new [seasonalview][seasonalview] package, with the same 
+structure as the [demo website of
+seasonal][seasweb]. To install
+[seasonalview][seasonalview], type:
 
-    install.packages("shiny")
+    install.packages("seasonalview")
 
-The goal of `inspect` is to summarize all relevant options, plots and statistics
-that should be usually considered. `inspect` uses a `"seas"` object as its main
+The goal of `view` is to summarize all relevant options, plots and statistics
+that should be usually considered. `view` uses a `"seas"` object as its main
 argument:
 
-    inspect(m)
+    view(m)
 
-Frequently used options can be modified using the drop down selectors in the
+Frequently used options can be modified using the drop-down selectors in the
 upper left panel. Each change will result in a re-estimation of the seasonal
 adjustment model. The R-call, the output and the summary are updated
 accordingly.
 
 Alternatively, the R-Call can be modified manually in the lower left panel.
-Press 'Run Call' to re-estimate the model and to adjust the option selectors,
-the output, and the summary. With the 'Close and Import' button, inspect is 
-closed and the call is imported to R. The 'static' button substitutes 
-automatic procedures by the automatically chosen 
-spec-argument options, in the same way as `static`.
+Press 'Run Call' to re-estimate the model and to adjust the options selectors,
+the output, and the summary. With the 'To Console' button, `view` is closed and
+an updated model returned to the R console. The 'Static' button
+substitutes automatic procedures by their corresponding static spec-argument
+options, in the same way as the `static` function.
 
-The views in the upper right panel can be selected from the drop down menu. The
-views can also be customized (see `?inspect` for details)
+The views in the upper right panel can be selected from the drop-down menu.
 
-The lower right panel shows the summary, as descibed in the help page of
-`?summary.seas`. The 'Full X-13 output' button opens the complete 
-output of X-13 in a separate tab or window.
+The lower right panel shows the summary, including the same information as the
+`summary` method. The 'X-13 output' button opens the complete  output of
+X-13 in a separate tab or window.
 
 
 ### Chinese New Year, Indian Diwali and other customized holidays
@@ -297,10 +311,9 @@ In order to adjust Indian industrial production for Diwali effects, use, e.g.,:
     # cny, diwali, easter: dates of Chinese New Year, Indian Diwali and Easter
     
     seas(iip, 
-    x11 = "",
-    xreg = genhol(diwali, start = 0, end = 0, center = "calendar"), 
-    regression.usertype = "holiday"
-    )
+         x11 = "",
+         xreg = genhol(diwali, start = 0, end = 0, center = "calendar"), 
+         regression.usertype = "holiday")
 
 For more examples, including Chinese New Year and complex pre- and post-holiday
 adjustments, see `?genhol`.
@@ -318,40 +331,35 @@ There are two kind of seasonal adjustments in production use:
 This section shows how both tasks can be accomplished with *seasonal* and basic R.
 
 
-#### Storing calls and batch processing
+#### Storing models and batch processing
 
-`seas` calls are R objects of the standard class `"call"`. Like any R object,
-calls can be stored in a list. In order to extract the call of a `"seas"`
-object, you can access the `$call` element or extract the static call with
-`static()`. For example,
+Seasonal adjustment models can be stored (using `save`) and re-evaluated at a
+later date when new data becomes available.
 
-    # two different models for two different time series
-    m1 <- seas(fdeaths, x11 = "")
-    m2 <- seas(mdeaths, x11 = "")
+    ap.short <- window(AirPassengers, end = c(1959, 12))
+    m <- seas(ap.short)
 
-    l <- list()
-    l$c1 <- static(m1)  # static call (with automated procedures substituted)
-    l$c2 <- m2$call     # original call
+The `static` function comes
+particularly handy to save the specifics of a model (e.g., outliers, ARIMA
+model) for future use. Often, it is desirable to store the following 'static'
+version of the model where the default automatic procedures in the model call
+are substituted by the choices they made. For example, in the
+model above, the automated procedures decided to perform a logarithmic pre-
+transformation of the data, to use an (0 1 1)(0 1 1) ARIMA model, to use trading
+day correction and to add an additive outlier in May, 1951. The static function
+'hard-codes' these findings into the model call, so that these decisions would
+not be re-evaluated at a later date:
 
+    m.static <- static(m, evaluate = TRUE) 
 
-The list can be stored and re-evaluated if new data becomes available:
-
-    ll <- lapply(l, eval)
-
-
-which returns another list containing the re-evaluated `"seas"` objects. If you 
-want to extract the final series, use:
-
-    do.call(cbind, lapply(ll, final))
-
-
-Of course, you also can extract any other series, e.g.:
-
-    # seasonal component of an X11 adjustment, see ?series
-    do.call(cbind, lapply(ll, series, "d10"))
+Either the static or the automated model can be re-evaluated when new data
+becomes available:
+    
+    update(m, x = AirPassengers)
+    update(m.static, x = AirPassengers)
 
 
-#### Automated adjustment of multiple series
+#### Automated adjustment of large numbers of series
 
 X-13 can also be applied to a large number of series, using automated adjustment
 methods. This can be accomplished with a loop or an apply function. It is useful
@@ -371,7 +379,7 @@ different automated routine.
     l1[is.err]
 
     # return final series of successful evaluations
-    do.cal1(cbind, lapply(l1[!is.err], final))
+    do.call(cbind, lapply(l1[!is.err], final))
 
 
 If you have several cores and want to speed things up, the process is well
@@ -435,6 +443,8 @@ especially grateful to Dirk Eddelbuettel for the fantastic work on the
 
 Please report bugs and suggestions on [Github][github] or send me an 
 [e-mail](mailto:christoph.sax@gmail.com). Thank you!
+
+[seasonalview]: https://cran.r-project.org/package=seasonalview "Graphical User Interface for Seasonal Adjustment"
 
 [x13binary]: https://cran.r-project.org/package=x13binary "X-13ARIMA-SEATS binary for R"
 

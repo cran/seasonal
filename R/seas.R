@@ -5,7 +5,9 @@
 #' seasonal adjustment that works well in most circumstances. Via the \code{...}
 #' argument, it is possible to invoke almost all options that are available in
 #' X-13ARIMA-SEATS (see  details). The default options of \code{seas} are listed
-#' as explicit arguments and are  discussed in the arguments section.
+#' as explicit arguments and are  discussed in the arguments section. A
+#' full-featured graphical user interface can be accessed by the 
+#' \code{\link{view}} function.
 #' 
 #'  It is possible to use the almost complete syntax of X-13ARIMA-SEAT via the
 #' \code{...} argument. The syntax of X-13ARIMA-SEATS uses \emph{specs} and
@@ -50,7 +52,7 @@
 #'   contain NAs. \code{na.omit} (default), \code{na.exclude} or \code{na.fail}.
 #'   If \code{na.action = na.x13}, NA handling is done by X-13, i.e. NA values 
 #'   are substituted by -99999.
-#' @param out   logical, should the X-13ARIMA-SEATS standard output be saved in 
+#' @param out   logical. Should the X-13ARIMA-SEATS standard output be saved in 
 #'   the \code{"seas"} object? (this increases object size substantially, it is 
 #'   recommended to re-evaluate the model using the \code{\link{out}} function 
 #'   instead.)
@@ -86,16 +88,16 @@
 #'   
 #'   The \code{final} function returns the final adjusted series, the 
 #'   \code{plot} method shows a plot with the unadjusted and the adjusted 
-#'   series. \code{summary} gives an overview of the regARIMA model. 
-#'   
-#' @seealso \code{\link{static}}, to return the static call that is needed to 
-#'   replicate an automatic model
+#'   series. \code{summary} gives an overview of the regARIMA model. The 
+#'   \code{\link{udg}} function returns diagnostical statistics.
+#'  
+#' @seealso \code{\link{view}}, for accessing the graphical user interface.
+#' @seealso \code{\link{update.seas}}, to update an existing \code{"seas"} 
+#'   model.
+#' @seealso \code{\link{static}}, to return the 'static' call, with automated
+#'   procedures substituted by their choices.
 #' @seealso \code{\link{series}}, for universal X-13 table series import.
-#' @seealso \code{\link{out}}, for the import of X-13 text files
-#' @seealso \code{\link{inspect}}, to interactively inspect a seasonal 
-#'   adjustment model.
-#' @seealso \code{\link{plot.seas}}, for diagnostical plots.
-#' @seealso \code{\link{udg}}, for diagnostical statistics.
+#' @seealso \code{\link{out}}, to view the full X-13 diagnostical output.
 #'   
 #' @references Vignette with a more detailed description: 
 #'   \url{http://www.seasonal.website/seasonal.html}
@@ -113,8 +115,12 @@
 #' 
 #' @examples
 #' \dontrun{
+#' Basic call
 #' m <- seas(AirPassengers) 
 #' summary(m)
+#' 
+#' # Graphical user interface
+#' view(m)
 #' 
 #' # invoke X-13ARIMA-SEATS options as 'spec.argument' through the ... argument
 #' # (consult the X-13ARIMA-SEATS manual for many more options and the list of
@@ -148,8 +154,12 @@
 #' static(m, test = FALSE)  # no testing (much faster)
 #' static(m, coef = TRUE)  # also fixes the coefficients
 #' 
+#' # updating an existing model
+#' update(m, x11 = "")
+#' 
 #' # specific extractor functions
 #' final(m) 
+#' predict(m)   # equivalent
 #' original(m) 
 #' resid(m) 
 #' coef(m)
@@ -186,8 +196,17 @@
 #' AirPassengersNA[20] <- NA 
 #' final(seas(AirPassengersNA, na.action = na.x13))
 #' 
-#' # inspect tool
-#' inspect(m)
+#' ## performing 'composite' adjustment
+#' m.direct <- seas(ldeaths, x11 = "")
+#' final.direct <- final(m.direct)
+#' m.indirect <- lapply(list(mdeaths, fdeaths), seas, x11 = "")
+#' 
+#'  # not very efficient, but keeps time series properties
+#' final.indirect <- Reduce(`+`, lapply(m.indirect, final)) 
+#' 
+#' ts.plot(cbind(final.indirect, final(m.direct)), col = 1:2)
+#' legend("topright", legend = c("disagregated", "aggregated"), lty = 1, col = 1:2)
+#' 
 #' }
 #' 
 seas <- function(x, xreg = NULL, xtrans = NULL, 
@@ -195,9 +214,10 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
          regression.aictest = c("td", "easter"), outlier = "", 
          automdl = "", na.action = na.omit,
          out = FALSE, dir = NULL, ..., list = NULL){
-  
-  # setX13Path()
-  
+    
+  z <- list()  # output object
+  z$call <- match.call()
+
   # intial checks
   checkX13(fail = TRUE, fullcheck = FALSE, htmlcheck = FALSE)
   
@@ -207,15 +227,26 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
   SERIES_SUFFIX <- SPECS$short[SPECS$is.series]
   
   # save series name
-  series.name <- deparse(substitute(x))
+  series.name <- deparse(substitute(x))[1]
 
-  # remove quotes in series.name, they are not allowed in X-13as
+  # remove quotes and : in series.names
   series.name <- gsub('[\'\\"]', '', series.name)
+  series.name <- gsub(':', '_', series.name)
+
+  # parent.frame() <- sys.frame(-1)  # environment where seas was called
 
   # using the list argument instead of '...''
   if (is.null(list)){
     list <- list(...)
+
+    # save call as list with evaluated arguments
+    cl <- match.call(seas, z$call)
+    z$list <- lapply(as.list(cl)[-1], eval, envir = parent.frame()) 
+
   } else {
+    # save list with evaluated arguments
+    z$list <- lapply(list, eval, envir = parent.frame())   
+
     if (!inherits(list, "list")){
       stop("the 'list' argument mus be of class 'list'")
     }
@@ -240,7 +271,6 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
     list <- list[!(names(list) %in% dl)]   
   }
   
-
   # check series
   if (!inherits(x, "ts")){
     stop("'x' argument is not a time series.")
@@ -313,14 +343,15 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
       user <- paste0("xreg", 1:NCOL(xreg))
       # user <- gsub("[\\(\\)]", "", colnames(xreg))
     }
-    if (!is.null(spc$regression)){
-      spc$regression$user <- user
-      spc$regression$file <- paste0("\"", xreg.file, "\"")
-      spc$regression$format <- "\"datevalue\""
-    } else if (!is.null(spc$x11regression)){
+
+    if (!is.null(spc$x11regression)){
       spc$x11regression$user <- user
       spc$x11regression$file <- paste0("\"", xreg.file, "\"")
       spc$x11regression$format <- "\"datevalue\""
+    } else {
+      spc$regression$user <- user
+      spc$regression$file <- paste0("\"", xreg.file, "\"")
+      spc$regression$format <- "\"datevalue\""
     }
   }
 
@@ -366,7 +397,6 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
   }
 
   ### Import from X13
-  z <- list()  # output object
   
   # check wether there is output at all.
   outfile <- if (getOption("htmlmode") == 1){
@@ -418,7 +448,6 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
     z$log <-  readLines(paste0(iofile, ".log"), encoding = "UTF-8")
   }
   
-  # browser()
   # read .est file
   z$est <- read_est(iofile)
 
@@ -473,7 +502,6 @@ seas <- function(x, xreg = NULL, xtrans = NULL,
 
   z$x <- x
   z$spc <- spc
-  z$call <- match.call()
   z$wdir <- wdir
 
   # clean up

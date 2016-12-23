@@ -1,15 +1,3 @@
-\textbf{No separate binary download required anymore!} \emph{seasonal}
-now depends on the
-\href{https://cran.r-project.org/package=x13binary}{x13binary} package
-to access pre-built binaries of X-13ARIMA-SEATS for all platforms. Many
-thanks to Dirk Eddelbuettel for the fantastic work on x13binary!
-
-Installing seasonal \emph{and} the binaries is now as easy as:
-
-\begin{verbatim}
-install.packages("seasonal")
-\end{verbatim}
-
 \section{Introduction}\label{introduction}
 
 \emph{seasonal} is an easy-to-use and full-featured R-interface to
@@ -19,9 +7,15 @@ Bureau}. X-13ARIMA-SEATS combines and extends the capabilities of the
 older X-12ARIMA (developed by the Census Bureau) and TRAMO-SEATS
 (developed by the Bank of Spain).
 
+\emph{seasonal} depends on the
+\href{https://cran.r-project.org/package=x13binary}{x13binary} package
+(by Dirk Eddelbuettel and Christoph Sax) to access pre-built binaries of
+X-13ARIMA-SEATS for all platforms and \textbf{does not require any
+manual installation}.
+
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=\textwidth]{images/inspect.jpg}
+\includegraphics[width=\textwidth]{images/view.jpg}
 \caption{Graphical user interface for X-13}
 \end{figure}
 
@@ -45,10 +39,11 @@ where the examples from the official X-13ARIMA-SEATS
 \href{http://www.census.gov/ts/x13as/docX13ASHTML.pdf}{manual} are
 reproduced in R.
 
-\emph{seasonal} includes a \hyperref[inspect]{graphical user interface}
-that facitlitates the use of X-13 both for beginners and advanced users.
-The final sections of this vignette cover additional topics:
-\hyperref[chinese-new-ux5cux2520year-ux5cux2520indian-diwali-in-other-customized-holidays]{User
+\emph{seasonal} includes a \hyperref[graphical-user-interface]{graphical
+user interface} that facitlitates the use of X-13 both for beginners and
+advanced users. The final sections of this vignette cover additional
+topics:
+\hyperref[chinese-new-year-indian-diwali-and-other-customized-holidays]{User
 defined holidays}, such as Chinese New Year, the
 \hyperref[production-use]{use of seasonal for production}, and the
 \hyperref[import-x-13-models-and-series]{import of existing X-13 model
@@ -56,7 +51,7 @@ specs} to R.
 
 \hyperdef{}{installation}{\section{Installation}\label{installation}}
 
-Since version 1.2, \emph{seasonal} relies on the
+\emph{seasonal} relies on the
 \href{https://cran.r-project.org/package=x13binary}{x13binary} package
 to access prebuilt binaries of X-13ARIMA-SEATS. To install both
 packages, type to the R console:
@@ -139,12 +134,14 @@ static(m)
 static(m, coef = TRUE)  # also fixes the coefficients
 \end{verbatim}
 
-If you have \emph{Shiny} installed, the \texttt{inspect} command offers
-an easy way to analyze and modify a seasonal adjustment procedure (see
-the section below for details):
+If you have
+\href{https://cran.r-project.org/package=seasonalview}{seasonalview}
+installed, the \texttt{view} command offers an easy way to analyze and
+modify a seasonal adjustment procedure (see the section below for
+details):
 
 \begin{verbatim}
-inspect(m)
+view(m)
 \end{verbatim}
 
 \hyperdef{}{input}{\section{Input}\label{input}}
@@ -191,7 +188,7 @@ translates to R in the following way:
 
 \begin{verbatim}
 seas(AirPassengers,
-     x11 = ""),
+     x11 = "",
      arima.model = "(0 1 1)"
 )
 \end{verbatim}
@@ -244,6 +241,30 @@ be supplied as a named list. This is useful for programming:
 seas(list = list(x = AirPassengers, x11 = ""))
 \end{verbatim}
 
+Additionally, \texttt{"seas"} objects can be altered using the
+\texttt{update} method. It uses the same syntax as the \texttt{seas}
+function. The following example turns off trading day adjustment and
+switches the adjustment method to X-11:
+
+\begin{verbatim}
+update(m, regression.variables = "td", x11 = "")
+\end{verbatim}
+
+A common use of \texttt{update} involves the recomputing with an
+\texttt{x} argument containing new data:
+
+\begin{verbatim}
+update(m, x = sqrt(AirPassengers))
+\end{verbatim}
+
+Lastly, a \texttt{predict} method can be used to extract the final
+series from an updated call, using the familar \texttt{newdata}
+argument:
+
+\begin{verbatim}
+predict(m, newdata = sqrt(AirPassengers))
+\end{verbatim}
+
 \hyperdef{}{output}{\section{Output}\label{output}}
 
 \emph{seasonal} has a flexible mechanism to read data from
@@ -263,7 +284,7 @@ the `forecast' spec enabled. It is also possible to return more than one
 output table at the same time:
 
 \begin{verbatim}
-series(m, c("forecast.forecasts", "d1"))
+series(m, c("forecast.forecasts", "s12"))
 \end{verbatim}
 
 You can use either the unique short names of X-13 (such as \texttt{d1}),
@@ -295,7 +316,7 @@ The \texttt{udg} function provides access to a large number of
 diagnostical statistics:
 
 \begin{verbatim}
-udg(x, "x13mdl")
+udg(m, "x13mdl")
 \end{verbatim}
 
 If you are using the HTML version of X-13, the \texttt{out} function
@@ -315,7 +336,6 @@ seasonal decomposition:
 \begin{verbatim}
 m <- seas(AirPassengers, regression.aictest = c("td", "easter"))
 plot(m)
-plot(m, trend = TRUE)
 \end{verbatim}
 
 The \texttt{monthplot} function allows for a monthwise plot (or
@@ -345,48 +365,52 @@ outlier types.
 identify(m)
 \end{verbatim}
 
-\hyperdef{}{inspect}{\section{Inspect}\label{inspect}}
+\hyperdef{}{graphical-user-interface}{\section{Graphical User
+Interface}\label{graphical-user-interface}}
 
-The \texttt{inspect} function is a graphical tool for choosing a
-seasonal adjustment model, using
-\emph{\href{http://shiny.rstudio.com}{Shiny}}, with the same structure
-as the \href{http://www.seasonal.website}{demo website of seasonal}. To
-install the latest version of Shiny, type:
-
-\begin{verbatim}
-install.packages("shiny")
-\end{verbatim}
-
-The goal of \texttt{inspect} is to summarize all relevant options, plots
-and statistics that should be usually considered. \texttt{inspect} uses
-a \texttt{"seas"} object as its main argument:
+The \texttt{view} function is a graphical tool for choosing a seasonal
+adjustment model, using the new
+\href{https://cran.r-project.org/package=seasonalview}{seasonalview}
+package, with the same structure as the
+\href{http://www.seasonal.website}{demo website of seasonal}. To install
+\href{https://cran.r-project.org/package=seasonalview}{seasonalview},
+type:
 
 \begin{verbatim}
-inspect(m)
+install.packages("seasonalview")
 \end{verbatim}
 
-Frequently used options can be modified using the drop down selectors in
+The goal of \texttt{view} is to summarize all relevant options, plots
+and statistics that should be usually considered. \texttt{view} uses a
+\texttt{"seas"} object as its main argument:
+
+\begin{verbatim}
+view(m)
+\end{verbatim}
+
+Frequently used options can be modified using the drop-down selectors in
 the upper left panel. Each change will result in a re-estimation of the
 seasonal adjustment model. The R-call, the output and the summary are
 updated accordingly.
 
 Alternatively, the R-Call can be modified manually in the lower left
 panel. Press `Run Call' to re-estimate the model and to adjust the
-option selectors, the output, and the summary. With the `Close and
-Import' button, inspect is closed and the call is imported to R. The
-`static' button substitutes automatic procedures by the automatically
-chosen spec-argument options, in the same way as \texttt{static}.
+options selectors, the output, and the summary. With the `To Console'
+button, \texttt{view} is closed and an updated model returned to the R
+console. The `Static' button substitutes automatic procedures by their
+corresponding static spec-argument options, in the same way as the
+\texttt{static} function.
 
-The views in the upper right panel can be selected from the drop down
-menu. The views can also be customized (see \texttt{?inspect} for
-details)
+The views in the upper right panel can be selected from the drop-down
+menu.
 
-The lower right panel shows the summary, as descibed in the help page of
-\texttt{?summary.seas}. The `Full X-13 output' button opens the complete
-output of X-13 in a separate tab or window.
+The lower right panel shows the summary, including the same information
+as the \texttt{summary} method. The `X-13 output' button opens the
+complete output of X-13 in a separate tab or window.
 
-\section{Chinese New Year, Indian Diwali and other customized
-holidays}\label{chinese-new-year-indian-diwali-and-other-customized-holidays}
+\hyperdef{}{chinese-new-year-indian-diwali-and-other-customized-holidays}{\section{Chinese
+New Year, Indian Diwali and other customized
+holidays}\label{chinese-new-year-indian-diwali-and-other-customized-holidays}}
 
 seasonal includes \texttt{genhol}, a function that makes it easy to
 model user-defined holiday regression effects. \texttt{genhol} is an R
@@ -404,10 +428,9 @@ e.g.,:
 # cny, diwali, easter: dates of Chinese New Year, Indian Diwali and Easter
 
 seas(iip, 
-x11 = "",
-xreg = genhol(diwali, start = 0, end = 0, center = "calendar"), 
-regression.usertype = "holiday"
-)
+     x11 = "",
+     xreg = genhol(diwali, start = 0, end = 0, center = "calendar"), 
+     regression.usertype = "holiday")
 \end{verbatim}
 
 For more examples, including Chinese New Year and complex pre- and
@@ -433,46 +456,42 @@ production use:
 This section shows how both tasks can be accomplished with
 \emph{seasonal} and basic R.
 
-\subsection{Storing calls and batch
-processing}\label{storing-calls-and-batch-processing}
+\subsection{Storing models and batch
+processing}\label{storing-models-and-batch-processing}
 
-\texttt{seas} calls are R objects of the standard class \texttt{"call"}.
-Like any R object, calls can be stored in a list. In order to extract
-the call of a \texttt{"seas"} object, you can access the \texttt{\$call}
-element or extract the static call with \texttt{static()}. For example,
+Seasonal adjustment models can be stored (using \texttt{save}) and
+re-evaluated at a later date when new data becomes available.
 
 \begin{verbatim}
-# two different models for two different time series
-m1 <- seas(fdeaths, x11 = "")
-m2 <- seas(mdeaths, x11 = "")
-
-l <- list()
-l$c1 <- static(m1)  # static call (with automated procedures substituted)
-l$c2 <- m2$call     # original call
+ap.short <- window(AirPassengers, end = c(1959, 12))
+m <- seas(ap.short)
 \end{verbatim}
 
-The list can be stored and re-evaluated if new data becomes available:
+The \texttt{static} function comes particularly handy to save the
+specifics of a model (e.g., outliers, ARIMA model) for future use.
+Often, it is desirable to store the following `static' version of the
+model where the default automatic procedures in the model call are
+substituted by the choices they made. For example, in the model above,
+the automated procedures decided to perform a logarithmic pre-
+transformation of the data, to use an (0 1 1)(0 1 1) ARIMA model, to use
+trading day correction and to add an additive outlier in May, 1951. The
+static function `hard-codes' these findings into the model call, so that
+these decisions would not be re-evaluated at a later date:
 
 \begin{verbatim}
-ll <- lapply(l, eval)
+m.static <- static(m, evaluate = TRUE) 
 \end{verbatim}
 
-which returns another list containing the re-evaluated \texttt{"seas"}
-objects. If you want to extract the final series, use:
+Either the static or the automated model can be re-evaluated when new
+data becomes available:
 
 \begin{verbatim}
-do.call(cbind, lapply(ll, final))
+update(m, x = AirPassengers)
+update(m.static, x = AirPassengers)
 \end{verbatim}
 
-Of course, you also can extract any other series, e.g.:
-
-\begin{verbatim}
-# seasonal component of an X11 adjustment, see ?series
-do.call(cbind, lapply(ll, series, "d10"))
-\end{verbatim}
-
-\subsection{Automated adjustment of multiple
-series}\label{automated-adjustment-of-multiple-series}
+\subsection{Automated adjustment of large numbers of
+series}\label{automated-adjustment-of-large-numbers-of-series}
 
 X-13 can also be applied to a large number of series, using automated
 adjustment methods. This can be accomplished with a loop or an apply
@@ -494,7 +513,7 @@ is.err <- sapply(l1, class) == "try-error"
 l1[is.err]
 
 # return final series of successful evaluations
-do.cal1(cbind, lapply(l1[!is.err], final))
+do.call(cbind, lapply(l1[!is.err], final))
 \end{verbatim}
 
 If you have several cores and want to speed things up, the process is

@@ -111,7 +111,8 @@ NULL
 #' 
 #' \url{http://www.chinesenewyears.info/chinese-new-year-calendar.php} 
 #'
-#' \url{http://india.gov.in/calendar}, with help from Pinaki Mukherjee
+#' Ministry of Statistics and Programme Implementation, with help from Pinaki 
+#'   Mukherjee
 #' 
 #' @name easter
 #' @aliases cny diwali
@@ -138,8 +139,7 @@ NULL
 #' @format Time series of class \code{"ts"}.
 #' 
 #' @source Central Statistics Office of the Ministry of Statistics and Programme 
-#' Implementation 
-#' \url{http://mospi.nic.in/Mospi_New/upload/iip/table3_04_05.xls}, with help 
+#' Implementation, with help 
 #' from Pinaki Mukherjee
 #' 
 #' @name iip
@@ -171,6 +171,27 @@ NULL
 #' data(seasonal)
 #' imp
 #' exp
+NULL
+
+
+#' United States Unemployment Level
+#' 
+#' Thousands of Persons
+#' 
+#' @docType data
+#' 
+#' @format Each time series is an object of class \code{"ts"}.
+#' 
+#' @source U.S. Bureau of Labor Statistics, retrieved from FRED, Federal Reserve 
+#'   Bank of St. Louis; \url{https://fred.stlouisfed.org/series/LNU03000000}, 
+#'   December 14, 2016.
+#' 
+#' @name unemp
+#' @keywords datasets
+#' @examples
+#' 
+#' data(seasonal)
+#' unemp
 NULL
 
 
