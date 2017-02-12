@@ -1,8 +1,8 @@
 Package: seasonal
 Type: Package
 Title: R Interface to X-13-ARIMA-SEATS
-Version: 1.4.0
-Date: 2016-12-23
+Version: 1.5.0
+Date: 2017-02-12
 Author: Christoph Sax
 Maintainer: Christoph Sax <christoph.sax@gmail.com>
 Description: Easy-to-use interface to X-13-ARIMA-SEATS, the seasonal adjustment
@@ -19,8 +19,8 @@ License: GPL-3
 URL: http://www.seasonal.website
 BugReports: https://github.com/christophsax/seasonal
 LazyData: true
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.0
 NeedsCompilation: no
-Packaged: 2016-12-23 04:32:39 UTC; christoph
+Packaged: 2017-02-12 08:46:46 UTC; christoph
 Repository: CRAN
-Date/Publication: 2016-12-23 12:08:00
+Date/Publication: 2017-02-12 12:03:51
