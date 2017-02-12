@@ -1,7 +1,7 @@
-e29957dbacbff64f4974ce2b4a36287e *DESCRIPTION
-fde177c335ededbf4cb21696d969a67b *NAMESPACE
-9c37e1565cbd1bbe87426be14f73d858 *NEWS
-bc6f4d05b927f8b0689a202a4fff1d8e *R/as.data.frame.R
+03b302ad2c3b78ce9e6731fcc52c4382 *DESCRIPTION
+008077d5fe5230ee3a0e673057292bc4 *NAMESPACE
+016c45f5d1bb14b3fcfa032473e18285 *NEWS
+de792edc3bde0e5249360117b9d8ebb3 *R/as.data.frame.R
 088ba764cbfbe32f4790ba0143be6ffe *R/base.methods.R
 e1b6cbc5e080e9d700d3d7cd30136b2a *R/checkX13.R
 1bc3edc0d61c83055c411624e94e4494 *R/defunct.R
@@ -29,7 +29,7 @@ d749f16f3a84f31ff55744f6bcd62d84 *R/spclist.R
 79e8e2caa2dc5cac3be79b0a7f986a08 *R/startup.R
 569391d9e43970d27edeaa63fc424e80 *R/static.R
 b70605d4bdb3cda221fba71c731fec7a *R/summary.R
-6c9728ee2bfbda2b10cee62ada7664c0 *R/udg.R
+2c8e0e54ff20172775093a47f75a08eb *R/udg.R
 9d018f987cd314de7ee41a2d9f127d9e *R/update.R
 a4e55345e541a49314062050dc5ea363 *R/view.R
 0cf8a4273aa4ad1b4464a1c62f33486a *R/x13messages.R
@@ -42,10 +42,10 @@ c638cabf0fcd782e83e2be54882bf9df *data/specs.RData
 afb9abf6c0699199d216ee059a98e2d5 *demo/00Index
 d070200585ff94b4f92e6a22cf6bf286 *demo/seas.R
 9b915ac9ea2a31fec6901e9290acc7ab *inst/doc/seas.Rnw
-002c23abb6a0f539c6f5e7c308dfc5c3 *inst/doc/seas.pdf
+0e231b079ea8ec5ef59be589867119e6 *inst/doc/seas.pdf
 3c5d125dbeab38f00d8da4c1de6027d5 *inst/tests/Testairline.spc
 9fe7bfa26166e16bd2849c6a247ac9c3 *man/SPECS.Rd
-50ac5e41450934996cba5eb29bfc4762 *man/as.data.frame.seas.Rd
+3cc83f32ece09e6b4ce35413ce637b34 *man/as.data.frame.seas.Rd
 007d78fe47e46f30462866185f5f4a96 *man/checkX13.Rd
 7c13ce90879432d2662840fa6bd4610e *man/cpi.Rd
 ff8205e1db44cb525e3cfaad3adede83 *man/easter.Rd

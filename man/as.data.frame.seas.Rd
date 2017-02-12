@@ -2,19 +2,17 @@
 % Please edit documentation in R/as.data.frame.R
 \name{as.data.frame.seas}
 \alias{as.data.frame.seas}
-\alias{as.data.frame.udg}
 \alias{as.data.frame.summary.seas}
 \title{Coerce Output to \code{data.frame}}
 \usage{
 \method{as.data.frame}{seas}(x, ...)
 
-\method{as.data.frame}{udg}(x, ...)
-
 \method{as.data.frame}{summary.seas}(x, ...)
 }
 \arguments{
-\item{x}{an object of class \code{"seas"}, \code{"udg"} or \code{"summary.seas"}, usually, a result of a 
-call to the functions with the same name.}
+\item{x}{an object of class \code{"seas"} or
+\code{"summary.seas"}, usually, the result of a call to the functions
+with the same name.}
 
 \item{...}{unused.}
 }
@@ -26,7 +24,8 @@ These methods coerce the output to a \code{data.frame}. This is useful for
 further processing. (This is a second attempt to do that; the first
 experimenal attempt in version 1.4 used an argument \code{data.frame} in the
 call to the functions, and is now obsolete. The present approach seems
-cleaner and is likely to stay, but still consider it as \strong{experimental}.)
+cleaner and is likely to stay, but still consider it as 
+\strong{experimental}.)
 }
 \details{
 The data.frames produced by these functions follow the naming conventions
@@ -35,9 +34,6 @@ from the 'broom' package, but do not depend on it otherwise.
 \examples{
 \dontrun{
 m <- seas(AirPassengers, x11 = "")
-
-# a data.frame containing the M-statistics
-as.data.frame(udg(m, paste0("f3.m", formatC(1:10, width=2, flag="0"))))
 
 # a data.frame containing data
 as.data.frame(m)
