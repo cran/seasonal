@@ -6,9 +6,11 @@
 \alias{cny}
 \alias{diwali}
 \title{Dates of Chinese New Year, Indian Diwali and Easter}
-\format{Objects of class \code{"Date"}.}
+\format{
+Objects of class \code{"Date"}.
+}
 \source{
-\url{http://www.census.gov/srd/www/genhol/genhol_downloads.html}
+\url{https://www.census.gov/srd/www/genhol/genhol_downloads.html}
 
 \url{http://www.chinesenewyears.info/chinese-new-year-calendar.php}
 
