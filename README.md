@@ -1,8 +1,14 @@
 R interface to X-13ARIMA-SEATS
 ------------------------------
 
-[![Build Status](https://travis-ci.org/christophsax/seasonal.svg?branch=master)](https://travis-ci.org/christophsax/seasonal) [![Build status](https://ci.appveyor.com/api/projects/status/y64skjd1g29t2gab?svg=true)](https://ci.appveyor.com/project/christophsax/seasonal)
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/christophsax/seasonal/workflows/R-CMD-check/badge.svg)](https://github.com/christophsax/seasonal/actions)
 [![Downloads](http://cranlogs.r-pkg.org/badges/seasonal)](https://cran.r-project.org/package=seasonal)
+<!-- [![Codecov test coverage](https://codecov.io/gh/christophsax/seasonal/branch/main/graph/badge.svg)](https://codecov.io/gh/christophsax/seasonal?branch=main) -->
+<!-- badges: end -->
+
+
+
 
 *seasonal* is an easy-to-use and full-featured R-interface to X-13ARIMA-SEATS,
 the newest seasonal adjustment software developed by the [United States Census
@@ -27,7 +33,7 @@ that works well in most circumstances:
     m <- seas(AirPassengers)
 
 For a more detailed introduction, check our [article in the *Journal of
-Statistical Software*](http://doi.org/10.18637/jss.v087.i11) or consider the
+Statistical Software*](https://doi.org/10.18637/jss.v087.i11) or consider the
 vignette:
 
     vignette("seas")
@@ -93,17 +99,17 @@ To cite seasonal in publications use:
 
 Sax C, Eddelbuettel D (2018). “Seasonal Adjustment by X-13ARIMA-SEATS
 in R.” _Journal of Statistical Software_, *87*(11), 1-17. doi:
-10.18637/jss.v087.i11 (URL: http://doi.org/10.18637/jss.v087.i11).
+10.18637/jss.v087.i11 (URL: https://doi.org/10.18637/jss.v087.i11).
 
-Please report bugs and suggestions on [Github][github]. Thank you!
+Please report bugs and suggestions on [GitHub][github]. Thank you!
 
 [seasonalview]: https://cran.r-project.org/package=seasonalview "Graphical User Interface for Seasonal Adjustment"
 
 [x13binary]: https://cran.r-project.org/package=x13binary "X-13ARIMA-SEATS binary for R"
 
-[manual]: http://www.census.gov/ts/x13as/docX13ASHTML.pdf "Reference Manual"
+[manual]: https://www.census.gov/ts/x13as/docX13ASHTML.pdf "Reference Manual"
 
-[census]: http://www.census.gov/srd/www/x13as/ "United States Census Bureau"
+[census]: https://www.census.gov/srd/www/x13as/ "United States Census Bureau"
 
 [license]: https://www.census.gov/srd/www/disclaimer.html "License Information and Disclaimer"
 

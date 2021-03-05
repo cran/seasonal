@@ -11,13 +11,19 @@ x13binary::checkX13binary()
 # r.version <- paste(R.Version()$major, R.Version()$minor, sep = ".")
 # is.oldrel <- .Platform$OS.type == "windows" && (compareVersion(r.version, "3.1.3") < 1)
 
-if (x13binary::supportedPlatform() & Sys.info()["sysname"] != "Darwin"){
+if (!x13binary::supportedPlatform()) skip("platform not supported")
 
-  library(seasonal)
-  checkX13()
+test_that("Baisc examples of seasonal work through", {
+  expect_null(checkX13())
+})
+
+
+test_that("Basic examples of seasonal work through", {
 
   m <- seas(AirPassengers)
   summary(m)
+
+  expect_s3_class(m, "seas")
 
   # invoke X-13ARIMA-SEATS options as 'spec.argument' through the ... argument
   # (consult the X-13ARIMA-SEATS manual for many more options and the list of
@@ -49,10 +55,10 @@ if (x13binary::supportedPlatform() & Sys.info()["sysname"] != "Darwin"){
   # static replication of 'm <- seas(AirPassengers)'
   static(m)  # this also tests the equivalence of the static call
   static(m, test = FALSE)  # no testing (much faster)
-  static(m, coef = TRUE)  # also fixes the coefficients
+  # static(m, coef = TRUE)  # also fixes the coefficients
 
   # specific extractor functions
-  final(m)
+  expect_s3_class(final(m), "ts")
   original(m)
   resid(m)
   coef(m)
@@ -60,10 +66,10 @@ if (x13binary::supportedPlatform() & Sys.info()["sysname"] != "Darwin"){
   spc(m)                  # the .spc input file to X-13 (for debugging)
 
   # universal extractor function for any X-13ARIMA-SEATS output (see ?series)
-  series(m, "forecast.forecasts")
+  expect_s3_class(series(m, "forecast.forecasts"), "ts")
 
   # copying the output of X-13 to a user defined directory
-  seas(AirPassengers, dir = ".")
+  expect_s3_class(seas(AirPassengers, dir = tempdir()), "seas")
 
   # user defined regressors (see ?genhol for more examples)
   # a temporary level shift in R base
@@ -92,13 +98,13 @@ if (x13binary::supportedPlatform() & Sys.info()["sysname"] != "Darwin"){
   series(m, "fct")  # re-evaluate with the forecast spec activated
 
   # more than one series
-  series(m, c("rsd", "fct"))
+  expect_s3_class(series(m, c("rsd", "fct")), "ts")
 
   m <- seas(AirPassengers, forecast.save = "fct")
   series(m, "fct") # no re-evaluation (much faster!)
 
   # using long names
-  series(m, "forecast.forecasts")
+  expect_s3_class(series(m, "forecast.forecasts"), "ts")
 
   # history spec (takes )
   # series(m, "history.trendestimates")
@@ -128,5 +134,15 @@ if (x13binary::supportedPlatform() & Sys.info()["sysname"] != "Darwin"){
   update(m, x11 = "")
   update(m, x = sqrt(AirPassengers), x11 = "")
 
-}
+  ### multi seas
+  # series as a list
+  m <- seas(x = list(a = mdeaths, b = AirPassengers), x11 = "", list = list(list(), list(outlier.critical = 3)))
+
+  m_a <- seas(mdeaths, x11 = "")
+  m_b <- seas(AirPassengers, x11 = "", outlier.critical = 3)
+
+  expect_equal(final(m$a), final(m_a))
+  expect_equal(final(m$b), final(m_b))
+
+})
 

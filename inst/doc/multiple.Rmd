@@ -1,0 +1,170 @@
+---
+title: "Adjusting Multiple Series"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{multiple}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  results='hide'
+)
+```
+
+It is now possible to seasonally adjust multiple series in a single call to `seas()`.
+This is done by using the built-in batch mode of X-13. It removes the need for loops or `lapply()` in such cases, and finally brings one missing feature of X-13 to seasonal -- the *composite* spec.
+
+### Basics
+
+Multiple adjustments can be performed by supplying multiple time series as an
+`"mts"` object:
+
+```{r}
+library(seasonal)
+m <- seas(cbind(fdeaths, mdeaths), x11 = "")
+final(m)
+```
+
+This will perform two seasonal adjustments, one for `fdeaths` and one for
+`mdeaths`. X-13 spec-argument combinations can be applied in the usual way, such
+as `x11 = ""`. Note that if entered that way, they will apply to both series.
+
+
+### Specifying the specs
+
+
+As in a single series call, we can also use the `list` argument:
+
+```{r}
+seas(cbind(fdeaths, mdeaths), list = list(x11 = ""))
+```
+
+It is possible to specify individual specs for each series, by encapsulating
+specific spec lists in the `list` argument. In the following, `fdeaths` is
+adjusted by X-11 and `mdeaths` by the default SEATS procedure. The length of
+list must be equal to number of series.
+
+```{r}
+seas(
+  cbind(fdeaths, mdeaths),
+  list = list(
+    list(x11 = ""),
+    list()
+  )
+)
+```
+
+We can even combine these ideas. The following turns off the
+AIC test of the regression spec for both series (`regression.aictest = NULL`) and uses X-11 to adjust
+`fdeaths` and SEATS to adjust `mdeaths`:
+
+```{r}
+seas(
+  cbind(fdeaths, mdeaths),
+  regression.aictest = NULL,
+  list = list(
+    list(x11 = ""),
+    list()
+  )
+)
+```
+
+### Specifying multiple series
+
+There are several ways of specifying multiple series. We have already seen how `"mts"`
+objects can be used as an input. Alternatively, we can also use a list of single
+`"ts"` objects:
+
+```{r}
+seas(list(mdeaths, AirPassengers))
+```
+
+This is convenient if series differ in length or frequency. With
+the [tsbox](https://www.tsbox.help) package, you can create such lists of time series from any time series object. Let us assume your data is in a data frame:
+
+```r
+library(tsbox)
+dta <- ts_c(mdeaths = ts_df(mdeaths), AirPassengers = ts_df(AirPassengers))
+head(dta)
+```
+
+In order to seasonally adjust all series in the data frame, you can run:
+
+```r
+seas(ts_tslist(dta))
+```
+
+Finally, you can specify the data directly in the list of lists:
+
+```{r}
+seas(
+  list = list(
+    list(x = mdeaths, x11 = ""),
+    list(x = fdeaths)
+  )
+)
+```
+
+### Backend
+
+X-13 ships with a batch mode that allows multiple adjustments in a single call
+to X-13. This is now the default in seasonal (`multimode = "x13"`).
+Alternatively, X-13 can be called for each series (`multimode = "R"`).
+The results should be usually the same, but switching to
+`multimode = "R"` may be useful for debugging:
+
+```{r}
+seas(cbind(fdeaths, mdeaths), multimode = "x13")
+seas(cbind(fdeaths, mdeaths), multimode = "R")
+```
+
+In general, `multimode = "x13"` is faster. The following comparison on a MacBook Pro shows
+a modest speed gain, but bigger differences have been observed on other systems:
+
+```r
+many <- rep(list(fdeaths), 100)
+system.time(seas(many, multimode = "x13"))
+#   user  system elapsed
+#  9.415   0.653  10.079
+system.time(seas(many, multimode = "R"))
+#   user  system elapsed
+# 11.130   1.039  12.324
+```
+
+
+### composite spec
+
+Support for the X-13 batch mode makes it finally possible to use the *composite*
+spec -- the one feature of X-13 that was missing in seasonal. Sometimes, one has to decide whether
+seasonal adjustment should be performed on a granular level, or on an aggregated
+level. The *composite* spec helps you to analyze the problem and to compare the
+direct and the indirect adjustment.
+
+X-13 requires to define a `series.comptype` for individual series. Usually, this
+will be set as `series.comptype = "add"`.
+
+The `composite` argument is a list with an X-13 specification that is applied on
+the aggregated series. Specification works identical as for other series in
+`seas()`, including the application of the defaults. If you provide an empty
+list, the usual defaults of `seas()` are used.
+A minimal composite call looks like this:
+
+```{r}
+seas(
+  cbind(mdeaths, fdeaths),
+  composite = list(),
+  series.comptype = "add"
+)
+```
+
+You can verify that the composite refers to the total of `mdeaths` and `fdeaths` by running:
+
+```{r}
+seas(ldeaths)
+```
+
+where `ldeaths` is the sum of `mdeaths` and `fdeaths`.

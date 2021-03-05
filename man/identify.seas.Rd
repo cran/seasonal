@@ -15,14 +15,14 @@
 }
 \value{
 an object of class \code{"seas"}, containing the static call of the
-  selected model.
+selected model.
 }
 \description{
 Select or deselect outliers by point and click. To quit and return the call, press
 ESC. Click several times to loop through different outlier types.
 }
 \examples{
-\dontrun{
+\donttest{
  m <- seas(AirPassengers)
  identify(m)
 }
