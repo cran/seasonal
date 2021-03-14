@@ -1,6 +1,6 @@
-56a5ea83ccbac25c3df405d8def2fa17 *DESCRIPTION
+8312a224b73835320f384a8f3f04bab8 *DESCRIPTION
 71d26936622de970686e064211b1e2b3 *NAMESPACE
-921a585ed86781dd6b0c9b9150582e15 *NEWS
+201fdd7eb831a6cab35c26d40d5d36b1 *NEWS
 4848c74286e604a1015d0c513fdec2a9 *R/align_x_list.R
 5fa8bac13ee8acaed2ddc2bb7e486523 *R/as.data.frame.R
 088ba764cbfbe32f4790ba0143be6ffe *R/base.methods.R
@@ -23,7 +23,7 @@ fef9ef8eb21cd03c0ff0234a2e4b0aa5 *R/read_est.R
 81e8e974500992564a8b3b7e4f85ce22 *R/read_mdl.R
 cb77811e2c0a8e24b0f474c977309fd2 *R/read_series.R
 914a053affa1808b70d5f0e4844cee0b *R/read_udg.R
-ae23dd06ca41c88d74916b779085ba1e *R/seas.R
+e9342c7b919db6f9aa723531200845d3 *R/seas.R
 1dfcc5bbf0b3d3c63cd855f9f106b0df *R/seas_list.R
 07c88e5170131f146735495e25f5e852 *R/seasonal-package.R
 71c453d5e3f1bf40d1464566407ea02f *R/series.R
@@ -34,15 +34,15 @@ f3168ff8d2388f1a825ff179a7ee311e *R/spclist.R
 9d540621d216c9ba2ea7be7bbee20310 *R/udg.R
 89391f8184a7521bffefb1e34362461e *R/update.R
 6d02c506aec37f480ddd8b37e8382011 *R/valid_names.R
-377b8de81a2fce87e95b5d8becfac85b *R/view.R
+9585f21be6bb2debfe3d80a548b9163f *R/view.R
 2e1aa48e34ad9daed593ecf0c89acf15 *R/wd_create.R
 b8b9e51548cf30376efe6bd295fa9a6e *R/x13_import.R
 91801385c84aba16d49219d1961b5159 *R/x13_prepare.R
 cb9c8aeffbfe1b23590c3cb89c5be7d4 *R/x13_run.R
 d909ea671998ce2484d831e4c5639ff8 *R/x13messages.R
 16984b0cc6e5d8ef3ce923d4ed2b5095 *README.md
-0df1123178b4e77c177fa4be021064e3 *build/partial.rdb
-d5cd20b642cbb8742b6dec258259c94f *build/vignette.rds
+68782d21932af16722cb039d33cc440d *build/partial.rdb
+f9bb697ac554084a90be0c3e99a15a3e *build/vignette.rds
 bb6fa682e9b11a70d4d959e844b243a0 *data/holiday.RData
 26fa2ec4907c518954acbec8f76c8f84 *data/seasonal.RData
 8dd68307fdc4e6a91bb47f43dda59e69 *data/specs.RData
@@ -50,11 +50,11 @@ afb9abf6c0699199d216ee059a98e2d5 *demo/00Index
 e47fa11fa938332e3bbfffa6dc2f447c *demo/seas.R
 6f57ffb6736e75fb11556453784d0d13 *inst/CITATION
 008a8f097806956210cd8335ad42860f *inst/WORDLIST
-f8b0e7d8ca984bb7f6189ade80726f42 *inst/doc/multiple.R
-8c88a0a7a7e62613553904c8bf4573aa *inst/doc/multiple.Rmd
+e0cd0e9e03c8a47212735400acacaebb *inst/doc/multiple.R
+1e8c86c128305cb2205ca2b4eb4bd7b7 *inst/doc/multiple.Rmd
 abcb641a3482bba3cd37f732ba843b55 *inst/doc/multiple.html
 09ec98d8431a17c444a3e1451dc0463a *inst/doc/seas.Rnw
-2735c72ed13ee4e45d31f00505647e0f *inst/doc/seas.pdf
+aa204bcbfaa2ecb6fda8457762cd5698 *inst/doc/seas.pdf
 3c5d125dbeab38f00d8da4c1de6027d5 *inst/tests/Testairline.spc
 e50152d9713a2b6f3d89e8fb0a0aa7ee *man/SPECS.Rd
 7a92680a2ae624bf1d64acc579874111 *man/as.data.frame.seas.Rd
@@ -74,7 +74,7 @@ c196810af38ec4706f065555c71a0609 *man/out.Rd
 109c816326178b2d3d50cb267c93bcde *man/outlier.Rd
 c95ef25e3c4b053f6d92dfce2a99f28e *man/plot.seas.Rd
 5f1f613c54c9501a399dd8d27d8a9fd9 *man/predict.seas.Rd
-171cd739609c0929b34b418a587b4ade *man/seas.Rd
+05c50eabb1848b24f6b62dead7d40ad2 *man/seas.Rd
 445e6acd178099921b68db7c8ccd0dd3 *man/seasonal-package.Rd
 8fbca09a0052a3673af6156b60f98b01 *man/series.Rd
 ebaff1a297d314ed58366961c3186ba7 *man/spc.Rd
@@ -84,7 +84,7 @@ c9c89164ec829d9d2d76946b1a7644dd *man/transformfunction.Rd
 58e38186ab22f1cd7a4c666aa1b33c80 *man/udg.Rd
 d7a184149dbcb57f131a5a934f0cfc5d *man/unemp.Rd
 81106fea923d5cbc4087e8b3eab0500f *man/update.seas.Rd
-e29ef21bd9066050f0b21be6e0887c51 *man/view.Rd
+6f458f91046dc7efd1214772e20e397e *man/view.Rd
 bcd2561600514d4e4730f17f81695634 *tests/nocran/examples/ex_run.csv
 8e2e5c76b30ca9fe1cb1f80de5061cb1 *tests/nocran/examples/test0.90.9.RData
 b80396abdd2dd6a7fbd60608a57810d7 *tests/nocran/settings.R
@@ -130,7 +130,7 @@ ab5fe779ad61e8911a64e66ea3c92d00 *tests/nocran/test-x13messages.R
 0622a97a2aaa3c342f09636052c2d7f5 *tests/spelling.R
 566d913459847be8f9fe7cfbdf938123 *tests/testthat.R
 31df2addfd2b708049f26c14b2941581 *tests/testthat/test-all.R
-7e8a4f4b279d7c274c1ab87e92f29735 *tests/testthat/test-cran.R
+fad98e592d97bf09f45a4b1d6125d23f *tests/testthat/test-cran.R
 476099a083bb66bc8111dee620656b98 *tests/testthat/test-issues.R
 c12793b9f91723895aa523733fc5bb1a *tests/testthat/test-multiple.R
 2b9f1412a8568e228e002be167b4412f *vignettes/Figures/monthplot.pdf
@@ -138,5 +138,5 @@ fc534b5935dcd78cb420ec5842cff85d *vignettes/Figures/plot.pdf
 30effd3db099eb5ae070ecbcc1b3e2de *vignettes/Figures/seasonal.jpg
 2b98d4390cf2694b8b2f5435c6002aa6 *vignettes/Figures/website.jpg
 220db5dae126d23f2b65277e5e771ed5 *vignettes/jss3006.bib
-8c88a0a7a7e62613553904c8bf4573aa *vignettes/multiple.Rmd
+1e8c86c128305cb2205ca2b4eb4bd7b7 *vignettes/multiple.Rmd
 09ec98d8431a17c444a3e1451dc0463a *vignettes/seas.Rnw
