@@ -1,10 +1,10 @@
-8312a224b73835320f384a8f3f04bab8 *DESCRIPTION
+b124eb25a4ccac878ac77e88b1372397 *DESCRIPTION
 71d26936622de970686e064211b1e2b3 *NAMESPACE
-201fdd7eb831a6cab35c26d40d5d36b1 *NEWS
+64ed408e3779543c7dca8b69494d8480 *NEWS
 4848c74286e604a1015d0c513fdec2a9 *R/align_x_list.R
 5fa8bac13ee8acaed2ddc2bb7e486523 *R/as.data.frame.R
 088ba764cbfbe32f4790ba0143be6ffe *R/base.methods.R
-742757ea995b0a010c4ae33da8a450ea *R/checkX13.R
+0f06a726aa509a63cfae1927875545cf *R/checkX13.R
 c615a041ee86750faab4b2a7145ff073 *R/deparse.R
 cd16b572bfad0a639a630a521a4b8941 *R/detect.R
 e32ea6cd9cb742b35274e4b9878297f2 *R/diagnostics.R
@@ -13,7 +13,7 @@ f0b7e30c92878d629ca5bd6e9f0f3bd9 *R/extractors.R
 c0f8804636e9eb0daf62f7ee89d84bc2 *R/genhol.R
 d6f74b7c703b346b7a24b2c945ee94bd *R/identify.R
 017aab583640c6a9ed43cf9490a6f6a2 *R/import.spc.R
-4edec6f23daf00bafb5ab0fd2c63f18f *R/multi_seas.R
+d409d36a2a19ad4576c4159944d75fac *R/multi_seas.R
 f91b26bce143e5f0c3bfdf870ce9aab6 *R/na.action.R
 d7bf909580e95fe45582367a58a02030 *R/out.R
 bdeae461f93f584528ddfe2c2d19dd33 *R/outlier.R
@@ -41,7 +41,7 @@ b8b9e51548cf30376efe6bd295fa9a6e *R/x13_import.R
 cb9c8aeffbfe1b23590c3cb89c5be7d4 *R/x13_run.R
 d909ea671998ce2484d831e4c5639ff8 *R/x13messages.R
 16984b0cc6e5d8ef3ce923d4ed2b5095 *README.md
-68782d21932af16722cb039d33cc440d *build/partial.rdb
+33dd6d8fdcd9e83c64667ffa24102d24 *build/partial.rdb
 f9bb697ac554084a90be0c3e99a15a3e *build/vignette.rds
 bb6fa682e9b11a70d4d959e844b243a0 *data/holiday.RData
 26fa2ec4907c518954acbec8f76c8f84 *data/seasonal.RData
@@ -54,7 +54,7 @@ e0cd0e9e03c8a47212735400acacaebb *inst/doc/multiple.R
 1e8c86c128305cb2205ca2b4eb4bd7b7 *inst/doc/multiple.Rmd
 abcb641a3482bba3cd37f732ba843b55 *inst/doc/multiple.html
 09ec98d8431a17c444a3e1451dc0463a *inst/doc/seas.Rnw
-aa204bcbfaa2ecb6fda8457762cd5698 *inst/doc/seas.pdf
+fc73e60b6ffe8fa3459788eb3172fb94 *inst/doc/seas.pdf
 3c5d125dbeab38f00d8da4c1de6027d5 *inst/tests/Testairline.spc
 e50152d9713a2b6f3d89e8fb0a0aa7ee *man/SPECS.Rd
 7a92680a2ae624bf1d64acc579874111 *man/as.data.frame.seas.Rd
@@ -130,7 +130,7 @@ ab5fe779ad61e8911a64e66ea3c92d00 *tests/nocran/test-x13messages.R
 0622a97a2aaa3c342f09636052c2d7f5 *tests/spelling.R
 566d913459847be8f9fe7cfbdf938123 *tests/testthat.R
 31df2addfd2b708049f26c14b2941581 *tests/testthat/test-all.R
-fad98e592d97bf09f45a4b1d6125d23f *tests/testthat/test-cran.R
+44e4bdb0c15585268da30d39e18d8f13 *tests/testthat/test-cran.R
 476099a083bb66bc8111dee620656b98 *tests/testthat/test-issues.R
 c12793b9f91723895aa523733fc5bb1a *tests/testthat/test-multiple.R
 2b9f1412a8568e228e002be167b4412f *vignettes/Figures/monthplot.pdf
