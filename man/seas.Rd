@@ -194,13 +194,9 @@ resid(m)
 coef(m)
 fivebestmdl(m)
 spc(m)                  # the .spc input file to X-13 (for debugging)
-out(m)                  # the X-13 .out file (see ?out, for details)
 
 # universal extractor function for any X-13ARIMA-SEATS output (see ?series)
 series(m, "forecast.forecasts")
-
-# copying the output of X-13 to a user defined directory
-seas(AirPassengers, dir = "~/mydir")
 
 # user defined regressors (see ?genhol for more examples)
 # a temporary level shift in R base
@@ -245,7 +241,7 @@ Comprehensive list of R examples from the X-13ARIMA-SEATS manual:
 \url{http://www.seasonal.website/examples.html}
 
 Official X-13ARIMA-SEATS manual:
-\url{https://www.census.gov/ts/x13as/docX13ASHTML.pdf}
+\url{https://www2.census.gov/software/x-13arima-seats/x13as/windows/documentation/docx13as.pdf}
 }
 \seealso{
 \code{\link[=view]{view()}}, for accessing the graphical user interface.

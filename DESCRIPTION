@@ -1,8 +1,8 @@
 Package: seasonal
 Type: Package
 Title: R Interface to X-13-ARIMA-SEATS
-Version: 1.8.2
-Date: 2021-03-23
+Version: 1.8.3
+Date: 2021-05-18
 Authors@R: c(
     person("Christoph", "Sax", email = "christoph.sax@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-7192-7044")),
     person("Dirk", "Eddelbuettel", role = c("ctb"), comment = c(ORCID = "0000-0001-6419-907X"))
@@ -28,9 +28,9 @@ Config/testthat/edition: 3
 VignetteBuilder: knitr
 Language: en-US
 NeedsCompilation: no
-Packaged: 2021-03-23 20:21:38 UTC; christoph
+Packaged: 2021-06-10 19:17:55 UTC; christoph
 Author: Christoph Sax [aut, cre] (<https://orcid.org/0000-0002-7192-7044>),
   Dirk Eddelbuettel [ctb] (<https://orcid.org/0000-0001-6419-907X>)
 Maintainer: Christoph Sax <christoph.sax@gmail.com>
 Repository: CRAN
-Date/Publication: 2021-03-29 16:30:02 UTC
+Date/Publication: 2021-06-15 08:10:05 UTC
