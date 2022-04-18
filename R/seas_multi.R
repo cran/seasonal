@@ -48,7 +48,7 @@ seas_multi <- function(x = NULL, xreg = NULL, xtrans = NULL,
   )
 
   wdir <- wdir_create()
-  iofiles <- file.path(wdir, series.names)
+  iofiles <- file.path(wdir, paste0("ser", seq_along(series.names)))
 
   # write specs
   spcs <- Map(
@@ -125,6 +125,9 @@ seas_multi <- function(x = NULL, xreg = NULL, xtrans = NULL,
   if (!out) {
     unlink(wdir, recursive = TRUE)
   }
+
+  zs$call <- zs[[1]]$call
+  class(zs) <- c("seas_multi", class(zs))
 
   zs
 

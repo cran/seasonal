@@ -1,3 +1,18 @@
+1.9.0
+--------------------------------------------------------------------------------
+
+bug fix
+  - seas() works within forking parallization (e.g., mclapply) #276
+    Thanks to @jonlachmann!
+  - annual series are read correctly #264
+  - Jan 1 can be used in genhol() #261
+  - genhol() produces correct result in 1931 #193
+  - out() works on composite objects #278
+  - series() works on composite objects #278
+  - Keep series specification also in `noinst/specs/specs.csv`
+  - Adjust specs to include composite series, some additional seats series
+
+
 1.8.4 2021-09-17
 --------------------------------------------------------------------------------
 

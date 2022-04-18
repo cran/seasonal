@@ -26,6 +26,7 @@
     </style>
 
 
+
 <style type="text/css">
   code {
     white-space: pre;
@@ -209,14 +210,18 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Support for the X-13 batch mode makes it finally possible to use the <em>composite</em> spec – the one feature of X-13 that was missing in seasonal. Sometimes, one has to decide whether seasonal adjustment should be performed on a granular level, or on an aggregated level. The <em>composite</em> spec helps you to analyze the problem and to compare the direct and the indirect adjustment.</p>
 <p>X-13 requires to define a <code>series.comptype</code> for individual series. Usually, this will be set as <code>series.comptype = &quot;add&quot;</code>.</p>
 <p>The <code>composite</code> argument is a list with an X-13 specification that is applied on the aggregated series. Specification works identical as for other series in <code>seas()</code>, including the application of the defaults. If you provide an empty list, the usual defaults of <code>seas()</code> are used. A minimal composite call looks like this:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">seas</span>(</span>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>m_composite <span class="ot">&lt;-</span> <span class="fu">seas</span>(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cbind</span>(mdeaths, fdeaths),</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">composite =</span> <span class="fu">list</span>(),</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">series.comptype =</span> <span class="st">&quot;add&quot;</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>m_composite</span></code></pre></div>
 <p>You can verify that the composite refers to the total of <code>mdeaths</code> and <code>fdeaths</code> by running:</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">seas</span>(ldeaths)</span></code></pre></div>
 <p>where <code>ldeaths</code> is the sum of <code>mdeaths</code> and <code>fdeaths</code>.</p>
+<p>The functions <code>out()</code> and <code>series()</code> can be used to extract the output or series of the composite adjustment:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">out</span>(m_composite)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">series</span>(m_composite, <span class="st">&quot;composite.indseasadj&quot;</span>)<span class="er">)</span></span></code></pre></div>
 </div>
 
 

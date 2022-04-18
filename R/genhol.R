@@ -202,22 +202,26 @@ genhol <- function(x, start = 0, end = 0, frequency = 12, center = "none"){
   if (!first.day %in% event.st){
     event.st.added <- c(first.day, event.st)
     event.st <- c(as.Date(NA), event.st)
+  } else {
+    event.st.added <- event.st
   }
   if (!first.day %in% event.en){
     event.en.added <- c(first.day, event.en)
     event.en <- c(as.Date(NA), event.en)
+  } else {
+    event.en.added <- event.en
   }
 
   # "ts" object with each date in the right period
   event.st.ts <- z.ts
-  event.st.ts[cut(event.st.added, by, labels = F)] <- as.character(event.st)
+  event.st.ts[cut(event.st.added, by, labels = FALSE)] <- as.character(event.st)
 
   event.en.ts <- z.ts
-  event.en.ts[cut(event.en.added, by, labels = F)] <- as.character(event.en)
+  event.en.ts[cut(event.en.added, by, labels = FALSE)] <- as.character(event.en)
 
   # number of days
-  days <- pmin((period.en), as.Date(as.character(event.en.ts)), na.rm = T) -
-    pmax(period.st, as.Date(as.character(event.st.ts)), na.rm = T) + 1
+  days <- pmin((period.en), as.Date(as.character(event.en.ts)), na.rm = TRUE) -
+    pmax(period.st, as.Date(as.character(event.st.ts)), na.rm = TRUE) + 1
 
   # filling NAs with start and end dates
   fillNA <- function(x){
@@ -236,8 +240,11 @@ genhol <- function(x, start = 0, end = 0, frequency = 12, center = "none"){
   # drop
   drop <- is.na(event.st.ts) & is.na(event.en.ts)
 
+  fill.na.event.en.ts <- fillNA(event.en.ts)
+  fill.na.event.en.ts[is.na(fill.na.event.en.ts)] <- as.Date("0001-01-01")
+
   # dont drop these (start value larger than end value)
-  drop[fillNA(event.st.ts) > fillNA(event.en.ts)] <- FALSE
+  drop[fillNA(event.st.ts) > fill.na.event.en.ts] <- FALSE
 
   days[drop] <- 0
   z.raw <- ts(c(days), start = start(z.ts), frequency = frequency(z.ts))
