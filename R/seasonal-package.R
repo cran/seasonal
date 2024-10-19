@@ -1,7 +1,7 @@
 #' seasonal: R interface to X-13ARIMA-SEATS
 #'
 #' @description
-#'   \pkg{seasonal} is an asy-to-use interface to X-13-ARIMA-SEATS, the seasonal
+#'   \pkg{seasonal} is an easy-to-use interface to X-13-ARIMA-SEATS, the seasonal
 #'   adjustment software by the US Census Bureau. It offers full access to
 #'   almost all options and outputs of X-13, including X-11 and SEATS, automatic
 #'   ARIMA model search, outlier detection and support for user defined holiday
@@ -71,13 +71,11 @@
 #'
 #' @name seasonal-package
 #' @aliases seasonal
-#' @docType package
 #' @author Christoph Sax \email{christoph.sax@@gmail.com}
 #' @keywords package
 #' @seealso [seas()] for the core function and more information on
 #'   package usage.
 NULL
-
 
 
 #' Consumer Price Index of Switzerland
@@ -110,7 +108,7 @@ NULL
 #' @format Objects of class `"Date"`.
 #'
 #' @source
-#' <https://www.census.gov/srd/www/genhol/genhol_downloads.html>
+#' <https://www2.census.gov/software/x-13arima-seats/win-genhol/download/>
 #'
 #' <http://www.chinesenewyears.info/chinese-new-year-calendar.php>
 #'
@@ -226,7 +224,7 @@ NULL
 get_specs <- function() {
   # https://r-pkgs.org/data.html#data-sysdata
   SPECS <- NULL
-  data(specs, envir = environment(), package = "seasonal")  # avoid side effects
+  data(SPECS, envir = environment(), package = "seasonal")  # avoid side effects
   SPECS
 }
 
